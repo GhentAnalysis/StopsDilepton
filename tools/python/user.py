@@ -88,7 +88,7 @@ if os.environ['USER'] in ['dspitzbart', 'dspitzba']:
     cern_proxy_certificate  = '/afs/cern.ch/user/d/dspitzba/private/.proxy'
     #postprocessing_output_directory = "/afs/hephy.at/data/dspitzbart03/nanoTuples/"
     cache_dir = "/afs/hephy.at/data/cms01/stopsDilepton/signals/caches/"
-    postprocessing_output_directory = "/afs/hephy.at/data/cms04/nanoTuples/"
+    postprocessing_output_directory = "/afs/hephy.at/data/cms03/nanoTuples/"
     if 'cern' in os.getenv("HOSTNAME"):
       postprocessing_output_directory = "/eos/home-d/dspitzba/nanoTuples/"
       analysis_results        = '/afs/cern.ch/work/d/dspitzba/StopsDilepton/results/80X_v30'

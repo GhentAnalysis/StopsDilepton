@@ -80,6 +80,39 @@ def getDict(cardFile):
     return result
 
 
+
+def getDictFromShape(cardFile):
+    return
+    '''
+    Get the meta information in the first go, then fill everything
+    '''
+    binList = False
+    estimateList = False
+    with open(cardFile) as f:
+        for line in f:
+            if len(line.split())<2: continue
+            if line.split()[0] == "bin":
+                if not binList:
+                    binList = True
+                    bins = line.split()[1:]
+                else:
+                    binList = line.split()[1:]
+            if line.split()[1] == 'lnN' or line.split()[1] == 'shape':
+                systematics.append(line.split()[0])
+            if line.split()[0] == "process":
+                if not estimateList: estimateList = line.split()[1:]
+    
+    # trick to get unique entries of estimate list
+    uniqueEstmates = list(set(estimateList))
+    processes   = uniqueEstmates + ['obs']
+    
+    # Build the skelleton
+    result = { b: { proc: { sys:0 for sys in systematics} for proc in processes } for b in bins }
+
+    # Not ready yet
+    return systematics, processes
+
+
 '''
 first       bin0                bin1          
 second     proc1     proc2     proc1     proc2

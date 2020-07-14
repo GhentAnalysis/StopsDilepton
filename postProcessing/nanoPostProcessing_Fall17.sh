@@ -3,7 +3,7 @@
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23   --skipGenLepMatching --sample TTZToLLNuNu #SPLIT20
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23   --skipGenLepMatching --sample TTZToLLNuNu_m1to10 #SPLIT4
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p24   --skipGenLepMatching --flagTTBar --sample TTLep_pow #SPLIT77
-python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p24   --skipGenLepMatching --flagTTBar --sample TTLep_pow_ext #SPLIT100
+#python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p24   --skipGenLepMatching --flagTTBar --sample TTLep_pow_ext #SPLIT100
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23   --skipGenLepMatching --flagTTBar --sample TTSingleLep_pow #SPLIT80
 ###
 ##python nanoPostProcessing.py/  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23   --skipGenLepMatching --sample DYJetsToLL_M50_ext1 #SPLIT10
@@ -111,3 +111,5 @@ python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processin
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23 --skipGenLepMatching --susySignal --fastSim --sample SMS_T8bbstausnu_mStop_200to1800_XCha0p5_XStau0p5 #SPLIT30
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p23 --skipGenLepMatching --susySignal --fastSim --sample SMS_T8bbstausnu_mStop_200to1800_XCha0p5_XStau0p75 #SPLIT30
 #
+python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p25 --TTDM --skipGenLepMatching --sample TTDM_Dilepton_scalar #SPLIT12
+python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2017 --processingEra stops_2017_nano_v0p25 --TTDM --skipGenLepMatching --sample TTDM_Dilepton_pseudoscalar #SPLIT10

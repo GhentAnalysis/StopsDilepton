@@ -39,6 +39,7 @@ from StopsDilepton.tools.leptonSF            import leptonSF as leptonSF_
 from StopsDilepton.tools.leptonHit0SF        import leptonHit0SF as leptonHit0SF_
 from StopsDilepton.tools.leptonSip3dSF       import leptonSip3dSF as leptonSip3dSF_
 from StopsDilepton.tools.leptonFastSimSF     import leptonFastSimSF as leptonFastSimSF_
+from StopsDilepton.samples.helpers           import getTTDMSignalWeightForEvent, getTTDMSignalWeight, getTTDMBranchNames
 from Analysis.Tools.overlapRemovalTTG        import photonFromTopDecay, hasMesonMother, getParentIds, isIsolatedPhoton, getPhotonCategory
 from Analysis.Tools.puProfileCache           import *
 from Analysis.Tools.L1PrefireWeight          import L1PrefireWeight
@@ -180,17 +181,20 @@ if options.runOnLxPlus:
 if options.year == 2016:
     from Samples.nanoAOD.Summer16_private_legacy_v1 import allSamples as mcSamples
     from Samples.nanoAOD.Run2016_17Jul2018_private  import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from StopsDilepton.samples.nanoAOD_TTDM_2016    import allSamples as TTDMSamples
+    allSamples = mcSamples + dataSamples + TTDMSamples
 elif options.year == 2017:
     from Samples.nanoAOD.Fall17_private_legacy_v1   import allSamples as mcSamples
     from Samples.nanoAOD.Run2017_31Mar2018_private  import allSamples as dataSamples
-    allSamples = mcSamples + dataSamples
+    from StopsDilepton.samples.nanoAOD_TTDM_2017    import allSamples as TTDMSamples
+    allSamples = mcSamples + dataSamples + TTDMSamples
 elif options.year == 2018:
     from Samples.nanoAOD.Spring18_private           import allSamples as HEMSamples
     from Samples.nanoAOD.Run2018_26Sep2018_private  import allSamples as HEMDataSamples
     from Samples.nanoAOD.Autumn18_private_legacy_v1 import allSamples as mcSamples
     from Samples.nanoAOD.Run2018_17Sep2018_private  import allSamples as dataSamples
-    allSamples = HEMSamples + HEMDataSamples + mcSamples + dataSamples
+    from StopsDilepton.samples.nanoAOD_TTDM_2018    import allSamples as TTDMSamples
+    allSamples = HEMSamples + HEMDataSamples + mcSamples + dataSamples + TTDMSamples
 else:
     raise NotImplementedError
 
@@ -365,6 +369,11 @@ if options.susySignal:
         logger.info("!!WARNING!! No ISR normaliztion factors found. Using the ISR weights will therefore change the normalization. Be careful!")
         #raise NotImplementedError ("Couldn't load ISR normalization factors.")
 
+if options.TTDM:
+    signalWeight = getTTDMSignalWeight( samples[0], lumi = targetLumi, year=options.year)
+
+#raise NotImplementedError
+
 len_orig = len(sample.files)
 ## sort the list of files?
 sample = sample.split( n=options.nJobs, nSub=options.job)
@@ -537,6 +546,9 @@ else:
     lumiScaleFactor = xSection*targetLumi/float(sample.normalization) if xSection is not None else None
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
 
+if options.TTDM:
+    branchKeepStrings += ["GenModel*"]
+
 jetVars         = ['pt/F', 'chEmEF/F', 'chHEF/F', 'neEmEF/F', 'neHEF/F', 'rawFactor/F', 'eta/F', 'phi/F', 'jetId/I', 'btagDeepB/F', 'btagCSVV2/F', 'area/F', 'pt_nom/F', 'corr_JER/F'] + jetCorrInfo
 if isMC:
     jetVars     += jetMCInfo
@@ -662,6 +674,37 @@ if options.susySignal:
         new_variables  += ['mCha/I', 'mSlep/I', 'sleptonPdg/I']
     if 'T2tt' in options.samples[0]:
         new_variables  += ['weight_pol_L/F', 'weight_pol_R/F']
+if options.TTDM:
+    new_variables  += ['reweightXSecUp/F', 'reweightXSecDown/F', 'mPhi/I', 'mChi/I', 'scalar/I', 'pseudoscalar/I']
+
+#myBranchNames = [\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_150_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_200_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_250_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_300_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_350_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_400_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_450_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_500_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_1_Mphi_50_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_20_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_30_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_40_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_45_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_49_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_51_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#'GenModel__TTbarDMJets_Dilepton_pseudoscalar_LO_Mchi_55_Mphi_100_TuneCP5_13TeV_madgraph_mcatnlo_pythia8/O',\
+#]
+
+if options.samples[0].count('_pseudoscalar'):
+    print getTTDMBranchNames('pseudoscalar', year=options.year)
+    read_variables += map(TreeVariable.fromString, ['%s/O'%x for x in getTTDMBranchNames('pseudoscalar', year=options.year) ] ) # try b or O
+    #read_variables = map(TreeVariable.fromString, [ 'MET_pt/F', 'MET_phi/F', 'run/I', 'luminosityBlock/I', 'event/l', 'PV_npvs/I', 'PV_npvsGood/I'] )
+if options.samples[0].count('_scalar'):
+    print getTTDMBranchNames('scalar', year=options.year)
+    read_variables += map(TreeVariable.fromString, ['%s/O'%x for x in getTTDMBranchNames('scalar', year=options.year) ] )
+
 
 if options.fastSim and (isTriLep or isDiLep):
     new_variables  += ['reweightLeptonFastSimSF/F', 'reweightLeptonFastSimSFUp/F', 'reweightLeptonFastSimSFDown/F']
@@ -861,6 +904,16 @@ def filler( event ):
             logger.info("Couldn't find weight for %s, %s. Setting weight to 0.", r.GenSusyMStop, r.GenSusyMNeutralino)
             event.reweightXSecUp    = 0.
             event.reweightXSecDown  = 0.
+    elif options.TTDM:
+        ttdmWeights             = getTTDMSignalWeightForEvent( sample, r, signalWeight )
+        event.weight            = ttdmWeights['weight'] * getattr(r, 'genWeight')
+        event.reweightXSecUp    = ttdmWeights['xSecFacUp']
+        event.reweightXSecDown  = ttdmWeights['xSecFacDown']
+        event.mChi              = ttdmWeights['mChi']
+        event.mPhi              = ttdmWeights['mPhi']
+        event.scalar            = ttdmWeights['spin'] == 'scalar'
+        event.pseudoscalar      = ttdmWeights['spin'] == 'pseudoscalar'
+
     elif isMC:
         if hasattr(r, "genWeight"):
             event.weight = lumiScaleFactor*r.genWeight if lumiScaleFactor is not None else 1

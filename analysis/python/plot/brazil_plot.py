@@ -4,13 +4,12 @@ import pickle, shutil
 from RootTools.core.standard                import *
 from array import array
 
-from StopsDilepton.samples.cmgTuples_FullSimTTbarDM_mAODv2_25ns_postProcessed import *
-from StopsDilepton.tools.user import combineReleaseLocation, analysis_results, plot_directory
+from StopsDilepton.tools.user              import plot_directory, analysis_results
 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--particle',           action='store',      default='S',            nargs='?', choices=['S','PS'], help="scalar (S) or pseudoscalar (PS)?")
-argParser.add_argument('--mChi',               action='store',      default=1,           help='Which DM particle mass?')
+argParser.add_argument('--spin',           action='store',      default='scalar',            nargs='?', choices=['scalar','pseudoscalar'], help="scalar (S) or pseudoscalar (PS)?")
+argParser.add_argument('--scan',               action='store',      default='mPhi',           help='Which DM particle mass to scan? mChi or mPhi')
 argParser.add_argument('--plot_directory',     action='store',      default='DMLimits')
 argParser.add_argument('--blinded',            action='store_true')
 argParser.add_argument('--cardDir',            action='store',      default='TTbarDM_preAppFix_DYttZflat')
@@ -25,15 +24,32 @@ categories = []
 mChi_list = []
 mPhi_list = []
 
-for s in DMsamples:
-    if not s[0] in mChi_list: mChi_list.append(s[0])
-    if not s[1] in mPhi_list: mPhi_list.append(s[1])
-    if not s[2] in categories: categories.append(s[2])
+#for s in DMsamples:
+#    if not s[0] in mChi_list: mChi_list.append(s[0])
+#    if not s[1] in mPhi_list: mPhi_list.append(s[1])
+#    if not s[2] in categories: categories.append(s[2])
 
-res = pickle.load(file(os.path.join(analysis_results,"fitAll","cardFiles",args.cardDir,"calculatedLimits.pkl")))
+#res = pickle.load(file(os.path.join(analysis_results,"fitAll","cardFiles",args.cardDir,"calculatedLimits.pkl")))
+res = pickle.load(file('../combination/calculatedLimits.pkl'))
 
-mChi = int(args.mChi)
-tp = args.particle
+if args.scan == 'mChi':
+    scanVar = 'mStop'
+    fixedVar = 'mLSP'
+    fixedMass = 1
+else:
+    scanVar = 'mLSP'
+    fixedVar = 'mStop'
+    fixedMass = 100
+
+import pandas
+df = pandas.DataFrame(res)
+
+#mChi = int(args.mChi)
+tp = args.spin
+
+from StopsDilepton.samples.helpers import getTTDMXSec
+
+filteredResults = df[((df['spin']==tp)&(df[fixedVar]==fixedMass))].sort_values(by=scanVar)
 
 mass        = []
 obs         = []
@@ -47,38 +63,49 @@ exp2Down    = []
 xsecs       = []
 zeros       = []
 
-from StopsDilepton.tools.xSecDM import *
-xSecDM_ = xSecDM()
+#from StopsDilepton.tools.xSecDM import *
+#xSecDM_ = xSecDM()
 
-for s in sorted(DMsamples):
-    if s[0] == mChi:
-        if s[2] == tp:
-            mass.append(s[1])
-            try:
-                res[(s[0],s[1],s[2])].has_key('0.500')
-                if args.xsec: xsec = xSecDM_.getXSec(tp,s[1],s[0])
-                else: xsec = 1
+for s in filteredResults[scanVar].tolist():
+    mass.append(s)
+    if args.scan == 'mChi':
+        mChi = s
+        mPhi = fixedMass
+    else:
+        mChi = fixedMass
+        mPhi = s
+    try:
+        tmp = filteredResults[filteredResults[scanVar]==s]#['0.500']
+        if args.xsec: xsec = getTTDMXSec(tp, mPhi, mChi)
+        else: xsec = 1
+        #xsec = 1
 
-                # x-sec line
-                xsecs.append(xsec)
+        # x-sec line
+        xsecs.append(xsec)
 
-                # expected line and bands
-                exp.append(xsec*(res[(s[0],s[1],s[2])]['0.500']))
-                exp1Up.append(xsec*(res[(s[0],s[1],s[2])]['0.840'] - res[(s[0],s[1],s[2])]['0.500']))
-                exp2Up.append(xsec*(res[(s[0],s[1],s[2])]['0.975'] - res[(s[0],s[1],s[2])]['0.500']))
-                exp1Down.append(xsec*(res[(s[0],s[1],s[2])]['0.500'] - res[(s[0],s[1],s[2])]['0.160']))
-                exp2Down.append(xsec*(res[(s[0],s[1],s[2])]['0.500'] - res[(s[0],s[1],s[2])]['0.025']))
+        # expected line and bands
+        exp.append(xsec*float(tmp['0.500']))
+        exp1Up.append(xsec*(float(tmp['0.840']) - float(tmp['0.500'])))
+        exp2Up.append(xsec*(float(tmp['0.975']) - float(tmp['0.500'])))
+        exp1Down.append(xsec*(float(tmp['0.500']) - float(tmp['0.160'])))
+        exp2Down.append(xsec*(float(tmp['0.500']) - float(tmp['0.025'])))
 
-                # observed line and theory uncertainty band
-                obs.append(xsec*(res[(s[0],s[1],s[2])]['-1.000']))
-                obsUp.append(xsec*res[(s[0],s[1],s[2])]['-1.000']*math.sqrt(0.3**2 + (xSecDM_.getXSec(tp,s[1],s[0],sigma=1)/xSecDM_.getXSec(tp,s[1],s[0]) - 1)**2))
-                obsDown.append(xsec*res[(s[0],s[1],s[2])]['-1.000']*math.sqrt(0.3**2 + (1 - xSecDM_.getXSec(tp,s[1],s[0],sigma=-1)/xSecDM_.getXSec(tp,s[1],s[0]))**2))
+        # observed line and theory uncertainty band
+        obs.append(xsec*(float(tmp['-1.000'])))
+        obsUp.append(xsec*(float(tmp['-1.000']))*0.3)
+        obsDown.append(xsec*(float(tmp['-1.000']))*0.3)
 
-                # technicality
-                zeros.append(0)
+        #obsUp.append(xsec*res[(s[0],s[1],s[2])]['-1.000']*math.sqrt(0.3**2 + (xSecDM_.getXSec(tp,s[1],s[0],sigma=1)/xSecDM_.getXSec(tp,s[1],s[0]) - 1)**2))
+        #obsDown.append(xsec*res[(s[0],s[1],s[2])]['-1.000']*math.sqrt(0.3**2 + (1 - xSecDM_.getXSec(tp,s[1],s[0],sigma=-1)/xSecDM_.getXSec(tp,s[1],s[0]))**2))
 
-            except KeyError:
-                print "Result not found for",(s[0],s[1],s[2])
+        # technicality
+        zeros.append(0)
+
+
+    except KeyError:
+        print "Result not found for"
+
+#raise NotImplementedError
 
 a_mass      = array('d',mass)
 a_obs       = array('d',obs)
@@ -116,7 +143,8 @@ xsecs.SetLineColor(ROOT.kRed+1)
 
 can = ROOT.TCanvas("can","",700,700)
 can.SetLogy()
-can.SetLogx()
+if args.scan == 'mPhi' and False:
+    can.SetLogx()
 
 #h2 = ROOT.TH1F('h2','h2',10,10,1000)
 
@@ -151,11 +179,15 @@ elif mChi == 50:
 mg.SetMaximum(y_max)
 mg.SetMinimum(y_min)
 mg.Draw("a3 same")
-if tp == 'S': tp_ = 'm_{#phi}'
-elif tp == 'PS': tp_ = 'm_{a}'
+if args.scan == 'mPhi':
+    if tp == 'scalar': tp_ = 'm_{#phi}'
+    elif tp == 'pseudoscalar': tp_ = 'm_{a}'
+else:
+    tp_ = 'm_{#chi}'
 mg.GetXaxis().SetTitle(tp_+" (GeV)")
 mg.GetYaxis().SetTitle("95% CL upper limit #sigma/#sigma_{theory}")
-mg.GetXaxis().SetRangeUser(10,1000)
+min_x = min(filteredResults[scanVar].tolist()) if not args.scan == 'mPhi' else 35
+mg.GetXaxis().SetRangeUser(min_x,max(filteredResults[scanVar].tolist()))
 
 xsecs.Draw("l same")
 exp.Draw("l same")
@@ -163,7 +195,7 @@ if not args.blinded: obs.Draw("l same")
 leg_size = 0.04 * 4
 
 
-leg = ROOT.TLegend(0.185,0.82-leg_size,0.5,0.82)
+leg = ROOT.TLegend(0.185,0.79-leg_size,0.5,0.79)
 leg.SetBorderSize(1)
 leg.SetFillColor(0)
 leg.SetLineColor(0)
@@ -178,18 +210,8 @@ leg.Draw()
 
 none = ROOT.TH1F()
 
-#leg2 = ROOT.TLegend(0.5,0.9-leg_size,0.8,0.9)
-#leg2.SetBorderSize(1)
-#leg2.SetFillColor(0)
-#leg2.SetLineColor(0)
-#leg2.SetTextSize(0.035)
-if tp == 'S': tp_ = 'Scalar mediator'
-elif tp == 'PS': tp_ = 'Pseudoscalar mediator'
-#leg2.AddEntry(none,tp_,'')
-#leg2.AddEntry(none,'#bf{Dirac DM}','')
-#leg2.AddEntry(none,"#bf{m_{#chi} = "+str(mChi)+" GeV}",'')
-#leg2.AddEntry(none,'#bf{g_{q} = 1, g_{#chi} = 1}','')
-#leg2.Draw()
+if tp == 'scalar': tp_ = 'Scalar mediator'
+elif tp == 'pseudoscalar': tp_ = 'Pseudoscalar mediator'
 
 extraText = ""
 #extraText = "Preliminary"
@@ -198,8 +220,16 @@ latex2 = ROOT.TLatex()
 latex2.SetNDC()
 latex2.SetTextSize(0.03)
 latex2.SetTextAlign(11) # align right
-latex2.DrawLatex(0.20,0.89,'#bf{'+tp_+', Dirac DM, m_{#chi} = '+str(mChi)+' GeV, g_{q} = 1, g_{DM} = 1}')
-latex2.DrawLatex(0.20,0.83,'#bf{95% CL upper limits}')
+if args.scan == 'mChi' and args.spin == 'scalar':
+    latex2.DrawLatex(0.20,0.89,'#bf{'+tp_+', Dirac DM, m_{#phi} = '+str(fixedMass)+' GeV}')
+elif args.scan == 'mChi' and args.spin == 'pseudoscalar':
+    latex2.DrawLatex(0.20,0.89,'#bf{'+tp_+', Dirac DM, m_{a} = '+str(fixedMass)+' GeV}')
+else:
+    latex2.DrawLatex(0.20,0.89,'#bf{'+tp_+', Dirac DM, m_{#chi} = '+str(fixedMass)+' GeV}')
+
+latex2.DrawLatex(0.20,0.85,'#bf{g_{q} = 1, g_{DM} = 1}')
+
+latex2.DrawLatex(0.20,0.80,'#bf{95% CL upper limits}')
 #latex2.DrawLatex(0.22,0.84,'#bf{m_{#chi} = '+str(mChi)+' GeV, g_{q} = 1, g_{#chi} = 1}')
 
 latex1 = ROOT.TLatex()
@@ -207,16 +237,18 @@ latex1.SetNDC()
 latex1.SetTextSize(0.04)
 latex1.SetTextAlign(11) # align right
 latex1.DrawLatex(0.16,0.96,'CMS #bf{#it{'+extraText+'}}')
-latex1.DrawLatex(0.71,0.96,"#bf{35.9 fb^{-1} (13 TeV)}")
+latex1.DrawLatex(0.71,0.96,"#bf{137 fb^{-1} (13 TeV)}")
+
+can.RedrawAxis()
 
 plot_dir = os.path.join(plot_directory,args.plot_directory)
 if not os.path.isdir(plot_dir):
     os.makedirs(plot_dir)
 
 if not args.blinded:
-    plot_dir += '/brazil_%s_mChi%s'%(tp,str(mChi))
+    plot_dir += '/brazil_%s_scan_%s'%(tp, args.scan)
 else:
-    plot_dir += '/brazil_%s_mChi%s_blinded'%(tp,str(mChi))
+    plot_dir += '/brazil_%s_scan_%s_blinded'%(tp, scanVar)
 
 filetypes = [".pdf",".png",".root"]
 
