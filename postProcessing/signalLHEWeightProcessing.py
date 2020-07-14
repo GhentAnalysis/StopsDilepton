@@ -36,6 +36,7 @@ argParser.add_argument('--sample',    action='store',      default='SMS_T2tt_mSt
 argParser.add_argument('--year',      action='store',      type=int,                        help="Which year?" )
 argParser.add_argument('--nJobs',     action='store',      nargs='?', type=int, default=1,  help="Maximum number of simultaneous jobs.")
 argParser.add_argument('--job',       action='store',      nargs='?', type=int, default=0,  help="Run only job i")
+argParser.add_argument('--fullsim',   action='store_true', help='You want to load fullsim samples?')#, default = True)
 args = argParser.parse_args()
 
 #
@@ -46,12 +47,20 @@ import RootTools.core.logger as _logger_rt
 logger    = _logger.get_logger(   args.logLevel, logFile = None)
 logger_rt = _logger_rt.get_logger(args.logLevel, logFile = None)
 
-if   args.year == 2016:
-    from Samples.miniAOD.Summer16_Fast_miniAODv3 import samples
-elif args.year == 2017:
-    from Samples.miniAOD.Fall17_Fast_miniAODv2 import samples
-elif args.year == 2018:
-    from Samples.miniAOD.Autumn18_Fast_miniAODv1 import samples
+if args.fullsim:
+    if   args.year == 2016:
+        from Samples.miniAOD.Summer16_miniAODv3 import samples
+    elif args.year == 2017:
+        from Samples.miniAOD.Fall17_miniAODv2 import samples
+    elif args.year == 2018:
+        from Samples.miniAOD.Autumn18_miniAODv1 import samples
+else:
+    if   args.year == 2016:
+        from Samples.miniAOD.Summer16_Fast_miniAODv3 import samples
+    elif args.year == 2017:
+        from Samples.miniAOD.Fall17_Fast_miniAODv2 import samples
+    elif args.year == 2018:
+        from Samples.miniAOD.Autumn18_Fast_miniAODv1 import samples
 
 sample = getattr(samples, args.sample)
 

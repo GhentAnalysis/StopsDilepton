@@ -120,22 +120,18 @@ position = {s.name:i_s for i_s,s in enumerate(mc)}
 signals = []
 if args.signal == "T2tt":
     if year == 2016:
-        #data_directory              = '/afs/hephy.at/data/cms07/nanoTuples/'
-        #data_directory              = '/afs/hephy.at/data/cms02/nanoTuples/'
-        #postProcessing_directory    = 'stops_2016_nano_v0p19/dilep/'
+        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        postProcessing_directory = "stops_2016_nano_v0p23/dilep/"
         from StopsDilepton.samples.nanoTuples_FastSim_Summer16_postProcessed import signals_T2tt as jobs
     elif year == 2017:
-        #data_directory              = '/afs/hephy.at/data/cms07/nanoTuples/'
-        #data_directory              = '/afs/hephy.at/data/cms01/nanoTuples/'
-        #postProcessing_directory    = 'stops_2017_nano_v0p19/dilep/'
+        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        postProcessing_directory = "stops_2017_nano_v0p23/dilep/"
         from StopsDilepton.samples.nanoTuples_FastSim_Fall17_postProcessed import signals_T2tt as jobs
     elif year == 2018:
-        #data_directory              = '/afs/hephy.at/data/cms02/nanoTuples/'
-        #postProcessing_directory    = 'stops_2018_nano_v0p19/dilep/'
-        #data_directory              = '/afs/hephy.at/data/cms05/nanoTuples/'
-        #postProcessing_directory    = 'stops_2018_nano_v0p16/dilep/'
+        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        postProcessing_directory = "stops_2018_nano_v0p23/dilep/"   
         from StopsDilepton.samples.nanoTuples_FastSim_Autumn18_postProcessed import signals_T2tt as jobs
-    
+
     jobNames = [ x.name for x in jobs ]
     #print jobNames
     T2tt_800_100 = jobs[jobNames.index("T2tt_800_100")]
