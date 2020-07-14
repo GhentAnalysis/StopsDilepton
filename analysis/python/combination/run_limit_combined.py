@@ -53,6 +53,7 @@ if options.signal == 'TTbarDM':
     spin, mStop, mLSP = options.only.split('_')[1:4]
 else:
     spin = None
+    print options.only.split('_')
     mStop, mLSP = options.only.split('_')[1:3]
 
 mStop, mLSP = int(mStop), int(mLSP)
@@ -97,24 +98,24 @@ systematics = [
     ("Integrated luminosity",                   "lumi",     ["Lumi_2016", "Lumi_2017", "Lumi_2018"],                'lnN',  True),
     ("Pileup modeling",                         "PU_weight",       ["PU_2016", "PU_2017", "PU_2018"],                shape,  True),
     ("Jet energy resolution",                   "JER",      ["JER_2018", "JER_2017",  "JER_2016"],                   shape,  True),
-    ("Modeling of unclust. en.",                "unclEn",   ["unclEn_2016", "unclEn_2017", "unclEn_2018"],           shape,  True), 
-    ("Trigger efficiency",                      "trigger2l",  ["trigger_2018", "trigger_2016", "trigger_2017"],        shape,  True),
+    ("Modeling of unclust. en.",                "metres",   ["unclEn_2016", "unclEn_2017", "unclEn_2018"],           shape,  True), 
+    ("Trigger efficiency",                      "trigger2l",  ["trigger_2018", "trigger_2016", "trigger_2017"],      shape,  True),
     ("b tagging light flavor",                  "SFl",      ["SFl_2018", "SFl_2017", "SFl_2016"],                    shape,  True),
     ("b tagging heavy flavor",                  "b",        ["SFb_2017", "SFb_2016", "SFb_2018"],                    shape,  True),
     ("Lepton scale factors",                    "leptonSF", ["leptonSF"],                                            shape,  False),
     ("L1 prefire correction",                   "Prefire_weight", ["L1prefire"],                                     shape,  False),
     ("0 missing hit scale factor",              "leptonHit0SF", ["leptonHit0SF"],                                    shape,  False),
     ("Impact parameter scale factor",           "leptonSIP3DSF", ["leptonSIP3DSF"],                                  shape,  False),
-    ("PDF choice",                              "PDF_Weight",      ["PDF"],                                                 shape,  False),
+    ("PDF choice",                              "PDF_Weight",      ["PDF"],                                          shape,  False),
     ("$p_{T}(\\textrm{top})$",                  "toppt",    ["topPt"],                                               shape,  False),
     ("t#bar{t} cross section",                  "topXSec",  ["topXSec"],                                             shape,  False),
-    ("t#bar{t}Z background",                    "ttZ_SR",   ["ttZ_SR"],                                              shape,  False),
+    ("t#bar{t}Z background",                    "TTZ_SF",   ["ttZ_SR"],                                              shape,  False),
     ("fake/non-prompt leptons",                 "topFakes", ["topFakes"],                                            shape,  False),
     ("Drell-Yan background",                    "DY_SR",    ["DY_SR"],                                               shape,  False),
     ("non-gaussian jet mismeasurements",        "topNonGauss", ["topNonGauss"],                                      shape,  False),
     ("multiboson background",                   "MB_SR",    ["MB_SR"],                                               shape,  False),
     ("$\mu_{R}$ and $\mu_{F}$ choice $(t\bar{t})$", "scaleTT", ["scaleTT"],                                          shape,  False),
-    ("rare background",                         "Rare2l",     ["rare"],                                                'lnN',  False),
+    ("rare background",                         "Rare2l",     ["rare"],                                              'lnN',  False),
     ("$\mu_{R}$ and $\mu_{F}$ choice $(t\bar{t}Z)$", "scaleTTZ", ["scaleTTZ"],                                       shape,  False),
     ("Drell-Yan tail",                          "DY_hMT2ll", ["DY_hMT2ll"],                                          shape,  False), 
 ]
@@ -227,7 +228,7 @@ for b in bins:
 #c.writeToFile(cardFileName)
 c.writeToShapeFile(cardFileName.replace('.txt', '_shape.root'))
 
-calcLimit = True
+calcLimit = False
 
 if calcLimit:
     import pandas

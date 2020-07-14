@@ -30,6 +30,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--small',     action='store_true', help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--overwrite', action='store_true', help='Overwrite?')#, default = True)
+argParser.add_argument('--TTDM',      action='store_true', help='Overwrite?')#, default = True)
 argParser.add_argument('--targetDir', action='store',      nargs='?',  type=str, default=user.postprocessing_output_directory, help="Name of the directory the post-processed files will be saved" )
 argParser.add_argument('--sample',    action='store',      default='SMS_T2tt_mStop_150to250', help="Name of the sample loaded from fwlite_benchmarks. Only if no inputFiles are specified")
 argParser.add_argument('--year',      action='store',      type=int,                        help="Which year?" )
@@ -111,11 +112,18 @@ def fill_vector( event, collection_name, collection_varnames, obj):
 
 logger.info( "Running over files: %s", ", ".join(sample.files ) )
 
+
+TTDM_scale_indices  = [6,11,16,21,26,31,36,41] 
+TTDM_PDF_indices    = range(46,147)
+TTDM_aS_indices     = [147,148]
+
+
 def filler( event ):
     event.run, event.luminosityBlock, event.event = reader.evt
     LHE_weights                 = reader.products['generator'].weights()
+    default_indices = LHE_weights[1:10] if not args.TTDM else TTDM_scale_indices+TTDM_PDF_indices+TTDM_aS_indices
     event.LHE_weight_original   = LHE_weights[0]
-    fill_vector_collection( event, "LHE", ["weight"], [ {'weight':w} for w in LHE_weights[1:10] ] )
+    fill_vector_collection( event, "LHE", ["weight"], [ {'weight':w} for w in default_indices ] )
 
 tmp_dir         = ROOT.gDirectory
 output_filename = os.path.join(output_directory, sample.name + '.root')
