@@ -154,9 +154,8 @@ if options.signal:
 
     elif options.signal == 'ttHinv':
         if year == 2016:
-            data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
-            postProcessing_directory    = 'stops_2018_nano_v0p22/dilep/'
-            logger.info(" ## NO 2016 ttH, H->invisible sample available. USING 2018 SAMPLE NOW. ## ")
+            data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+            postProcessing_directory    = 'stops_2016_nano_v0p26/dilep/'
         elif year == 2017:
             data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
             postProcessing_directory    = 'stops_2017_nano_v0p22/dilep/'
@@ -221,6 +220,9 @@ SUSY: no weights stored atm.
 scale_indices = [0,1,3,4,5,7,8]
 if options.signal == 'ttHinv':
     LHEweight_original = 'abs(LHEScaleWeight[4])'
+elif options.signal.count('scalar'):
+    scale_indices = [0,1,2,3,4,6,8] # skip extremes (indices 5 and 7)
+    LHEweight_original = 'abs(LHE_weight[0])'
 elif options.signal.startswith('T'):
     LHEweight_original = 'abs(LHE_weight[4])'
 else:
@@ -237,6 +239,17 @@ pdf_indices = range(100) if year == 2016 else range(30)
 
 if options.signal.startswith('T'):
     pdf_indices = []
+elif options.signal.count('scalar'):
+    pdf_indices = range(9,110) # 9 is central
+
+'''
+alpha_S indices TTDM: 110, 111
+PS indices in TTDM samples:
+- 112 central
+- 113,114,115,116 reduced: isrRedHi,fsrRedHi,isrRedLo,fsrRedLo
+- 117,118,119,120 default
+- 121,122,123,124 conservative
+'''
 
 #if year == 2016:
 #    if options.sample == 'TTLep_pow': #only use ttbar sample, no single-t

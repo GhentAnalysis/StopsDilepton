@@ -1,10 +1,10 @@
 #!/bin/sh
-#python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
-python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
-#python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2017 --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
-python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2017 --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
-#python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2018 --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
-python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2018 --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2017 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2017 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2018 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_scalar #SPLIT40
+python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2018 --overwrite --TTDM --fullsim --sample TTbarDMJets_Dilepton_pseudoscalar #SPLIT40
 
 #python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --sample SMS_T2tt_mStop_150to250 #SPLIT40
 #python signalLHEWeightProcessing.py --targetDir /afs/hephy.at/data/cms05/nanoTuples/ --year 2016 --sample SMS_T2tt_mStop_250to350 #SPLIT40

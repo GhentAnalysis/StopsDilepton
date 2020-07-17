@@ -1008,9 +1008,9 @@ if args.signal == "T8bbllnunu_XCha0p5_XSlep0p95":
 
 if args.signal == "ttHinv":
     if year == 2016:
-        data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
-        postProcessing_directory    = 'stops_2018_nano_v0p22/dilep/'
-        logger.info(" ## NO 2016 ttH, H->invisible sample available. USING 2018 SAMPLE NOW. ## ")
+        data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+        postProcessing_directory    = 'stops_2016_nano_v0p26/dilep/'
+        #logger.info(" ## NO 2016 ttH, H->invisible sample available. USING 2018 SAMPLE NOW. ## ")
     elif year == 2017:
         data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
         postProcessing_directory    = 'stops_2017_nano_v0p22/dilep/'

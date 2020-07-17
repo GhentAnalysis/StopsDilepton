@@ -260,9 +260,11 @@ else:
 
 # Add scale etc. friends
 has_susy_weight_friend = False
-if options.susySignal and options.fastSim:
+if (options.susySignal and options.fastSim) or options.TTDM:
     # Make friend sample
     friend_dir = "/afs/hephy.at/data/cms05/nanoTuples/signalWeights/%s/%s"% (options.year, sample.name )
+    if options.TTDM:
+        friend_dir = friend_dir.replace('TTDM', 'TTbarDMJets') # stupid hack
     if os.path.exists( friend_dir ):
         weight_friend = Sample.fromDirectory( "weight_friend", directory = [friend_dir] ) 
         if weight_friend.chain.BuildIndex("luminosityBlock", "event")>0:
@@ -607,7 +609,8 @@ new_variables += [\
 
 # Add weight branches for susy signal samples from friend tree
 if has_susy_weight_friend:
-    new_variables.extend([ "LHE[weight/F]", "LHE_weight_original/F"] )
+    #new_variables.extend([ "LHE[weight/F]", "LHE_weight_original/F"] )
+    new_variables.extend([ "LHE_weight_original/F"] )
 
 if sample.isData: new_variables.extend( ['jsonPassed/I','isData/I'] )
 new_variables.extend( ['nBTag/I', 'ht/F', 'metSig/F'] )
@@ -859,14 +862,20 @@ def filler( event ):
             event.isOnShellTTZ = event.genZ_mass > 70
         
     # weight
-    if options.susySignal:
+    if options.susySignal or options.TTDM:
         if has_susy_weight_friend:
             if weight_friend.chain.GetEntryWithIndex(r.luminosityBlock, r.event)>0:
                 event.LHE_weight_original =  weight_friend.chain.GetLeaf("LHE_weight_original").GetValue()
                 event.nLHE = int(weight_friend.chain.GetLeaf("nLHE").GetValue())
                 for nEvt in range(event.nLHE):
-                    event.LHE_weight[nEvt] = weight_friend.chain.GetLeaf("LHE_weight").GetValue(nEvt)
+                    try:
+                        event.LHE_weight[nEvt] = weight_friend.chain.GetLeaf("LHE_weight").GetValue(nEvt)
+                    except IndexError:
+                        event.LHE_weight[nEvt] = 0
+                        print "couldn't find index %s"%nEvt
+                        raise
 
+    if options.susySignal:
         r.GenSusyMStop = max([p['mass']*(abs(p['pdgId']==1000006)) for p in gPart])
         r.GenSusyMNeutralino = max([p['mass']*(abs(p['pdgId']==1000022)) for p in gPart])
         if 'T8bbllnunu' in options.samples[0]:
@@ -1326,7 +1335,7 @@ def filler( event ):
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
 treeMaker_parent = TreeMaker(
     sequence  = [ filler ],
-    variables = [ TreeVariable.fromString(x) for x in new_variables ],
+    variables = [ TreeVariable.fromString(x) for x in new_variables ] if not has_susy_weight_friend else  [ TreeVariable.fromString(x) for x in new_variables ] + [ VectorTreeVariable('LHE', ['weight/F'], nMax=150) ],
     treeName = "Events"
     )
 

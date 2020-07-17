@@ -107,5 +107,5 @@
 #python nanoPostProcessing.py  --forceProxy --skim inclusive --massSkim 250,100  --year 2018 --processingEra stops_2018_nano_v0p20_1  --skipGenLepMatching --susySignal --fastSim --sample SMS_T2tt_mStop_150to250 #SPLIT1
 #
 #python nanoPostProcessing.py  --forceProxy --skim dilep  --year 2018 --processingEra stops_2018_nano_v0p23  --skipGenLepMatching --susySignal --sample SMS_T2tt_mStop_650_mLSP_350 #SPLIT5
-python nanoPostProcessing.py  --forceProxy --skim dilep --year 2018 --processingEra stops_2018_nano_v0p25  --skipGenLepMatching --TTDM --sample TTDM_Dilepton_scalar  #SPLIT14
-python nanoPostProcessing.py  --forceProxy --skim dilep --year 2018 --processingEra stops_2018_nano_v0p25  --skipGenLepMatching --TTDM --sample TTDM_Dilepton_pseudoscalar  #SPLIT12
+python nanoPostProcessing.py  --forceProxy --skim dilep --year 2018 --processingEra stops_2018_nano_v0p26  --skipGenLepMatching --overwrite --TTDM --sample TTDM_Dilepton_scalar  #SPLIT14
+python nanoPostProcessing.py  --forceProxy --skim dilep --year 2018 --processingEra stops_2018_nano_v0p26  --skipGenLepMatching --overwrite --TTDM --sample TTDM_Dilepton_pseudoscalar  #SPLIT12

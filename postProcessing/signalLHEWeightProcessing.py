@@ -30,7 +30,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--small',     action='store_true', help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--overwrite', action='store_true', help='Overwrite?')#, default = True)
-argParser.add_argument('--TTDM',      action='store_true', help='Overwrite?')#, default = True)
+argParser.add_argument('--TTDM',      action='store_true', help='TTDM samples?')
 argParser.add_argument('--targetDir', action='store',      nargs='?',  type=str, default=user.postprocessing_output_directory, help="Name of the directory the post-processed files will be saved" )
 argParser.add_argument('--sample',    action='store',      default='SMS_T2tt_mStop_150to250', help="Name of the sample loaded from fwlite_benchmarks. Only if no inputFiles are specified")
 argParser.add_argument('--year',      action='store',      type=int,                        help="Which year?" )
@@ -80,7 +80,8 @@ if not os.path.exists( output_directory ):
     logger.info( "Created output directory %s", output_directory )
 
 variables = ["run/I", "luminosityBlock/I", "event/l"]
-variables += ["LHE_weight_original/F", "LHE[weight/F]"]
+#variables += ["LHE_weight_original/F", "LHE[weight/F]"]
+variables += ["LHE_weight_original/F"]
 
 # read weight names
 lumis           = Lumis(sample.files)
@@ -122,17 +123,21 @@ def fill_vector( event, collection_name, collection_varnames, obj):
 logger.info( "Running over files: %s", ", ".join(sample.files ) )
 
 
-TTDM_scale_indices  = [6,11,16,21,26,31,36,41] 
+TTDM_scale_indices  = [1,6,11,16,21,26,31,36,41] 
 TTDM_PDF_indices    = range(46,147)
 TTDM_aS_indices     = [147,148]
-
+TTDM_PS_indices     = range(409,422) # isr/fsr weights. keep them if needed
 
 def filler( event ):
     event.run, event.luminosityBlock, event.event = reader.evt
     LHE_weights                 = reader.products['generator'].weights()
-    default_indices = LHE_weights[1:10] if not args.TTDM else TTDM_scale_indices+TTDM_PDF_indices+TTDM_aS_indices
+    try:
+        weights = LHE_weights[1:10] if not args.TTDM else [ LHE_weights[x] for x in TTDM_scale_indices+TTDM_PDF_indices+TTDM_aS_indices+TTDM_PS_indices ]
+    except IndexError:
+        print "LHE_weights list is too short. Was expecting at least %s, but is only %s."%(max(TTDM_scale_indices+TTDM_PDF_indices+TTDM_aS_indices+TTDM_PS_indices), len(LHE_weights))
+        weights = []
     event.LHE_weight_original   = LHE_weights[0]
-    fill_vector_collection( event, "LHE", ["weight"], [ {'weight':w} for w in default_indices ] )
+    fill_vector_collection( event, "LHE", ["weight"], [ {'weight':w} for w in weights ] )
 
 tmp_dir         = ROOT.gDirectory
 output_filename = os.path.join(output_directory, sample.name + '.root')
@@ -151,7 +156,7 @@ output_file = ROOT.TFile( output_filename, 'recreate')
 output_file.cd()
 maker = TreeMaker(
     sequence  = [ filler ],
-    variables = [ TreeVariable.fromString(x) for x in variables ],
+    variables = [ TreeVariable.fromString(x) for x in variables ] + [ VectorTreeVariable('LHE', ['weight/F'], nMax=150) ] ,
     treeName = "Events"
     )
 
