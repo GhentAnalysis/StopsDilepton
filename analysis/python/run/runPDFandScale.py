@@ -59,7 +59,7 @@ year        = int(options.year)
 
 # dummy values for now
 PDFset = 'NNPDF30' # keep this for now, it has no physical impact although 2017 and 2018 LHAPDFs are used
-PDFType = "hessian" if (year == 2017 or year == 2018) else "replicas"
+PDFType = "hessian" if (year == 2017 or year == 2018 or options.signal=='TTbarDM') else "replicas"
 #PDFType = "hessian"
 PSweights = False
 
@@ -165,6 +165,20 @@ if options.signal:
         ttH_HToInvisible_M125 = Sample.fromDirectory(name="ttH_HToInvisible_M125", treeName="Events", isData=False, color=1, texName="ttH(125)", directory=os.path.join(data_directory,postProcessing_directory,'ttH_HToInvisible'))
         jobs = [ttH_HToInvisible_M125]
 
+    elif options.signal == 'TTbarDM':
+        if year == 2016:
+            data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+            postProcessing_directory    = 'stops_2016_nano_v0p26/dilep/'
+            from StopsDilepton.samples.nanoTuples_Summer16_TTDM_postProcessed import signals as jobs
+        elif year == 2017:
+            data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+            postProcessing_directory    = 'stops_2017_nano_v0p26/dilep/'
+            from StopsDilepton.samples.nanoTuples_Fall17_TTDM_postProcessed import signals as jobs
+        elif year == 2018:
+            data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+            postProcessing_directory    = 'stops_2018_nano_v0p26/dilep/'
+            from StopsDilepton.samples.nanoTuples_Autumn18_TTDM_postProcessed import signals as jobs
+
 
     if options.only.isdigit():
         sample = jobs[int(options.only)]
@@ -220,7 +234,7 @@ SUSY: no weights stored atm.
 scale_indices = [0,1,3,4,5,7,8]
 if options.signal == 'ttHinv':
     LHEweight_original = 'abs(LHEScaleWeight[4])'
-elif options.signal.count('scalar'):
+elif options.signal == 'TTbarDM':
     scale_indices = [0,1,2,3,4,6,8] # skip extremes (indices 5 and 7)
     LHEweight_original = 'abs(LHE_weight[0])'
 elif options.signal.startswith('T'):
@@ -237,10 +251,10 @@ centralWeight = LHEweight_original
 
 pdf_indices = range(100) if year == 2016 else range(30)
 
-if options.signal.startswith('T'):
-    pdf_indices = []
-elif options.signal.count('scalar'):
+if options.signal == 'TTbarDM':
     pdf_indices = range(9,110) # 9 is central
+elif options.signal.startswith('T'):
+    pdf_indices = []
 
 '''
 alpha_S indices TTDM: 110, 111
@@ -262,25 +276,34 @@ PS indices in TTDM samples:
 #    #    raise NotImplementedError
 
 if not options.selectWeight:
+    centralPDFIndex = 0 if  not options.signal == 'TTbarDM' else 9
     if options.signal == 'ttHinv':
         scaleWeightString   = 'LHEScaleWeight'
     elif options.signal.startswith('T'):
-        scaleWeightString   ='LHE_weight'
+        scaleWeightString   ='LHE_weight' # also applies to TTbarDM
     else:
         scaleWeightString   = 'LHEScaleWeight'
+
     scale_variations    = [ "abs(%s[%s])"%(scaleWeightString, str(i)) for i in scale_indices ]
-    pdfWeightString     = 'LHEPdfWeight'
-    if year == 2016:
+    pdfWeightString     = 'LHEPdfWeight' if not options.signal == 'TTbarDM' else 'LHE_weight'
+    if year == 2016 and not options.signal == 'TTbarDM':
         PDF_variations      = [ "abs(%s[%s])"%(pdfWeightString, str(i)) for i in pdf_indices ]
     else:
-        PDF_variations      = [ "(abs(%s[%s])/abs(%s[0]))"%(pdfWeightString, str(i), pdfWeightString) for i in pdf_indices ]
+        if not options.signal == 'TTbarDM':
+            PDF_variations      = [ "(abs(%s[%s])/abs(%s[%s]))"%(pdfWeightString, str(i), pdfWeightString, str(centralPDFIndex)) for i in pdf_indices ]
+        else:
+            PDF_variations      = [ "(%s[%s])"%(pdfWeightString, str(i)) for i in pdf_indices ]
+
     aS_variations       = [] #[ "abs(LHEPdfWeight[100])", "abs(LHEPdfWeight[101])"] if year == 2016 else [ "abs(LHEPdfWeight[31])", "abs(LHEPdfWeight[32])"]
+    if options.signal == 'TTbarDM':
+        aS_variations       = [ "(%s[%s])"%(pdfWeightString, str(i)) for i in [110,111] ]
+
     if options.signal == 'ttHinv':
         variations          = scale_variations + PDF_variations + ['(1)'] 
-    elif options.signal.startswith('T'):
+    elif options.signal.startswith('T2') or options.signal.startswith('T8'):
         variations          = scale_variations + ['(1)']
     else:
-        variations          = scale_variations + PDF_variations + ['(1)']
+        variations          = scale_variations + PDF_variations + ['(1)'] + aS_variations
 
 print variations
 
@@ -331,6 +354,7 @@ if not options.skipCentral:
     # First run over seperate channels
     jobs.append((noRegions[0], 'all', setupIncl))
     jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[LHEweight_original]})))
+    jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[PDF_variations[0]]})))
     jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[LHEweight_original_PDF]})))
     #jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':['(1)']})))
     for var in variations:
@@ -346,11 +370,14 @@ if not options.combine:
             jobs.append((region, c, setupSR))
             jobs.append((region, c, setupTT))
             jobs.append((region, c, setupSR.sysClone(sys={'reweight':[LHEweight_original]})))
+            jobs.append((region, c, setupSR.sysClone(sys={'reweight':[PDF_variations[0]]})))
             jobs.append((region, c, setupTT.sysClone(sys={'reweight':[LHEweight_original]})))
+            jobs.append((region, c, setupTT.sysClone(sys={'reweight':[PDF_variations[0]]})))
             #jobs.append((region, c, setupTT.sysClone(sys={'reweight':['(1)']})))
             if not c == 'EMu':
                 jobs.append((region, c, setupDYVV))
                 jobs.append((region, c, setupDYVV.sysClone(sys={'reweight':[LHEweight_original]})))
+                jobs.append((region, c, setupDYVV.sysClone(sys={'reweight':[PDF_variations[0]]})))
             for var in variations:
                 jobs.append((region, c, setupSR.sysClone(sys={'reweight':[var]})))
                 jobs.append((region, c, setupTT.sysClone(sys={'reweight':[var]})))
@@ -364,6 +391,7 @@ if not options.combine:
             for setup in [setupTTZ1,setupTTZ2,setupTTZ3,setupTTZ4,setupTTZ5]:
                 jobs.append((noRegions[0], c, setup))
                 jobs.append((noRegions[0], c, setup.sysClone(sys={'reweight':[LHEweight_original]})))
+                jobs.append((noRegions[0], c, setup.sysClone(sys={'reweight':[PDF_variations[0]]})))
                 #jobs.append((noRegions[0], c, setup.sysClone(sys={'reweight':['(1)']})))
                 for var in variations:
                     jobs.append((noRegions[0], c, setup.sysClone(sys={'reweight':[var]})))
@@ -470,10 +498,10 @@ if options.combine:
                 ## PDF stuff
                 #sigma_incl_central_PDF  = estimate.cachedEstimate(noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[LHEweight_original_PDF]}))
                 logger.debug("sigma_incl_central_PDF")
-                sigma_incl_central_PDF  = estimate.cachedEstimate(noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':['(1)']}))
+                sigma_incl_central_PDF  = estimate.cachedEstimate(noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[PDF_variations[0]]})) # changed from (1)
                 logger.debug("sigma_centralWeight_PDF")
-                sigma_centralWeight_PDF = estimate.cachedEstimate(region, c, setup.sysClone(sys={'reweight':['(1)']}))
-                for var in PDF_variations:
+                sigma_centralWeight_PDF = estimate.cachedEstimate(region, c, setup.sysClone(sys={'reweight':[PDF_variations[0]]}))
+                for i, var in enumerate(PDF_variations):
                     # calculate x-sec noramlization
                     logger.debug("simga_incl_reweight")
                     simga_incl_reweight = estimate.cachedEstimate(noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[var]}))
@@ -488,6 +516,8 @@ if options.combine:
                     ## recommendation for hessian is to have delta_sigma = sum_k=1_N( (sigma_k - sigma_0)**2 )
                     ## so I keep the norm for both sigma_k and sigma_0 to obtain the acceptance uncertainty. Correct?
                     delta_squared += ( sigma_reweight.val - sigma_centralWeight_PDF.val )**2
+                    #print i, delta_squared
+                    #print sigma_reweight.val, sigma_centralWeight_PDF.val
                 
                 deltas = sorted(deltas)
 
@@ -499,6 +529,7 @@ if options.combine:
                     lower = len(deltas)*16/100 - 1
                     delta_sigma = (deltas[upper]-deltas[lower])/2
                 elif PDFType == "hessian":
+                    print 
                     delta_sigma = math.sqrt(delta_squared)
 
                 # recommendation is to multiply uncertainty by 1.5
@@ -527,7 +558,7 @@ if options.combine:
                 except:
                     delta_sigma_rel = 0.01 # eh wurscht
 
-                if delta_sigma_rel > 1: print "############# ALERTA #################"
+                if delta_sigma_rel > 1: print "############# ALERTA #################", delta_sigma_rel
 
                 # calculate the PS uncertainties
                 if PSweights:
@@ -566,8 +597,8 @@ if options.combine:
                 logger.info("Calculated PDF and alpha_s uncertainties for region %s in channel %s"%(region, c))
                 logger.info("Central x-sec: %s", sigma_central)
                 logger.info("Delta x-sec using PDF variations: %s", delta_sigma)
-                #logger.info("Delta x-sec using alpha_S variations: %s", delta_sigma_alphaS)
-                #logger.info("Delta x-sec total: %s", delta_sigma_total)
+                logger.info("Delta x-sec using alpha_S variations: %s", delta_sigma_alphaS)
+                logger.info("Delta x-sec total: %s", delta_sigma_total)
                 logger.info("Relative uncertainty: %s", delta_sigma_rel)
                 logger.info("Relative scale uncertainty: %s", scale_rel)
                 #logger.info("Relative shower scale uncertainty: %s", PS_scale_rel)
