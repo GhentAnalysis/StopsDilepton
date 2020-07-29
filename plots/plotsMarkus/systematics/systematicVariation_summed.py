@@ -22,7 +22,7 @@ from StopsDilepton.tools.user            import plot_directory, analysis_results
 from StopsDilepton.tools.helpers         import deltaPhi, add_histos
 from Analysis.Tools.metFilters           import getFilterCut
 from StopsDilepton.tools.cutInterpreter  import cutInterpreter
-from StopsDilepton.tools.RecoilCorrector import RecoilCorrector
+#from StopsDilepton.tools.RecoilCorrector import RecoilCorrector
 from StopsDilepton.tools.mt2Calculator   import mt2Calculator
 from Analysis.Tools.puReweighting        import getReweightingFunction
 from Analysis.Tools.DirDB                import DirDB
@@ -126,7 +126,11 @@ plots          = {}
 for i_directory, directory in enumerate(args.directories):
 
     dirDB = DirDB(os.path.join(directory, 'cache'))
-    v_data, v_plots, stack_mc, stack_data, stack_signal = dirDB.get(dirdb_key)
+    try:
+        v_data, v_plots, stack_mc, stack_data, stack_signal = dirDB.get(dirdb_key)
+    except TypeError as e:
+        logger.error("Something wrong with directory %i %s key: %s", i_directory, directory, dirdb_key)
+        raise e
     variation_data[directory] = v_data
     plots[directory] = v_plots 
     if variation_data[directory] is None: 
@@ -406,5 +410,5 @@ for mode in ['mumu', 'ee', 'mue', 'SF', 'all']:
               scaling = {0:1} if args.normalize else {},
               legend = ( (0.18,0.88-0.03*sum(map(len, plot.histos)),0.9,0.88), 2),
               drawObjects = drawObjects( args.scaling ) + boxes,
-              copyIndexPHP = True, extensions = ["png", "pdf"],
+              copyIndexPHP = True, extensions = ["png", "pdf", "root"],
             )

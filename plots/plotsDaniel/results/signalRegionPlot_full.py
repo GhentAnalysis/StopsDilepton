@@ -176,7 +176,7 @@ if options.combined:
         dataHist.SetBinContent(i+1, sum([hists[x]['data'].Eval(i+0.5) for x in years]))
 
     histos['data'] = dataHist
-    histos['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1., drawOption='e0' )
+    histos['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1.)#, drawOption='e0' )
     histos['data'].legendOption = 'p'
 
     signalHist = hists[years[0]]['DY'].Clone()
@@ -225,7 +225,7 @@ else:
         dataHist.SetBinError(i+1, math.sqrt(hists['data'].Eval(i+0.5)))
 
     hists['data'] = dataHist
-    hists['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1., drawOption='e0' )
+    hists['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1.)#, drawOption='e0' )
     hists['data'].legendOption = 'p'
 
     if options.signalOnly:
@@ -251,7 +251,7 @@ else:
         massPoint2 = [ x for x in massPoints[1].split('_') if not x.isalpha() ]
         hists['signal2'].legendText = options.signal+' (%s,%s)'%(tuple(massPoint2))    
 
-SF_file = analysis_results + 'SF.pkl'
+SF_file = os.path.join(analysis_results, 'SF.pkl')
 if os.path.isfile(SF_file):
     SF_dict = pickle.load(file(SF_file, 'r'))
 else:
@@ -259,6 +259,7 @@ else:
 
 SF_dict.update(SFs)
 pickle.dump(SF_dict, file(SF_file, 'w'))
+print "Written %s" % SF_file
 yaml.dump(SF_dict, file('SFs.yaml', 'w'))
 
 boxes = []
