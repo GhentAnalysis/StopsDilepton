@@ -305,7 +305,7 @@ if not options.selectWeight:
     else:
         variations          = scale_variations + PDF_variations + ['(1)'] + aS_variations
 
-print variations
+#print variations
 
 # only properly works for selectRegion>0
 selectRegion = True if options.selectRegion >= 0 else False
@@ -358,8 +358,8 @@ if not options.skipCentral:
     jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[LHEweight_original_PDF]})))
     #jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':['(1)']})))
     for var in variations:
-        for c in ['EE', 'MuMu', 'EMu']:
-            jobs.append((noRegions[0], c, setupIncl.sysClone(sys={'reweight':[var]})))
+        #for c in ['EE', 'MuMu', 'EMu']:
+        jobs.append((noRegions[0], 'all', setupIncl.sysClone(sys={'reweight':[var]})))
 
 
 if not options.combine:
@@ -529,7 +529,6 @@ if options.combine:
                     lower = len(deltas)*16/100 - 1
                     delta_sigma = (deltas[upper]-deltas[lower])/2
                 elif PDFType == "hessian":
-                    print 
                     delta_sigma = math.sqrt(delta_squared)
 
                 # recommendation is to multiply uncertainty by 1.5
@@ -549,14 +548,18 @@ if options.combine:
 
                     # add alpha_s and PDF in quadrature
                     delta_sigma_total = math.sqrt( delta_sigma_alphaS**2 + delta_sigma**2 )
+                    try:
+                        delta_sigma_alphaS_rel = delta_sigma_alphaS/sigma_central.val
+                    except:
+                        0.001
                 else:
                     delta_sigma_total = delta_sigma
 
                 # make it relative wrt central value in region
                 try:
-                    delta_sigma_rel = delta_sigma_total/sigma_central.val
+                    delta_sigma_rel = delta_sigma/sigma_central.val
                 except:
-                    delta_sigma_rel = 0.01 # eh wurscht
+                    delta_sigma_rel = 0.001 # eh wurscht
 
                 if delta_sigma_rel > 1: print "############# ALERTA #################", delta_sigma_rel
 
@@ -599,13 +602,14 @@ if options.combine:
                 logger.info("Delta x-sec using PDF variations: %s", delta_sigma)
                 logger.info("Delta x-sec using alpha_S variations: %s", delta_sigma_alphaS)
                 logger.info("Delta x-sec total: %s", delta_sigma_total)
-                logger.info("Relative uncertainty: %s", delta_sigma_rel)
+                logger.info("Relative PDF uncertainty: %s", delta_sigma_rel)
+                logger.info("Relative alpha_S uncertainty: %s", delta_sigma_alphaS_rel)
                 logger.info("Relative scale uncertainty: %s", scale_rel)
                 #logger.info("Relative shower scale uncertainty: %s", PS_scale_rel)
                 
                 if sigma_central.val>0:
-                    print "stat uncertainty", sigma_central.sigma/sigma_central.val
-                    print "scale uncertainty", scale_rel
+                    #print "stat uncertainty", sigma_central.sigma/sigma_central.val
+                    #print "scale uncertainty", scale_rel
                     if sigma_central.sigma/sigma_central.val < scale_rel or True:
                         Scale_unc.append(scale_rel)
                     #Scale_unc.append(scale_rel)

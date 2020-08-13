@@ -16,6 +16,7 @@ parser.add_option('--expected',             action = "store_true", help="Run exp
 parser.add_option('--preliminary',          action = "store_true", help="Run expected?")
 parser.add_option('--testGrayscale',        action = "store_true", help="Do the most important test for this collaboration?")
 parser.add_option('--signalCard',           action = "store_true", help="Make card for signal?")
+parser.add_option('--scaleTTZ',             action = "store_true", help="Scale ttZ by 1.07?")
 parser.add_option("--year",                 action='store',      default=0, type="int", help='Which year?')
 parser.add_option("--postFix",              action='store',      default="", help='Add sth?')
 parser.add_option("--version",              action='store', default='v8',  help='which version to use?')
@@ -51,10 +52,13 @@ cardName = "%s"%(options.only) if not options.signal == 'ttHinv' else "ttH_HToIn
 
 if options.signal == 'TTbarDM':
     spin, mStop, mLSP = options.only.split('_')[1:4]
-else:
+elif options.signal == 'T2tt' or options.signal == 'T2bW':
     spin = None
     print options.only.split('_')
     mStop, mLSP = options.only.split('_')[1:3]
+else:
+    mStop, mLSP = 125, 0
+
 
 mStop, mLSP = int(mStop), int(mLSP)
 
@@ -86,7 +90,7 @@ bkgHist=[]
 processes = [   ('TTJets',     'TTJets',     't#bar{t}/t'),
                 ('DY',         'DY',         'Drell-Yan'),
                 ('multiBoson', 'multiBoson', 'VV/VVV'),
-                ('TTZ',        'TTZDL',      't#bar{t}Z'),
+                ('TTZ',        'TTZ',        't#bar{t}Z'),
                 ('TTXNoZ',     'TTXNoZ',     't#bar{t}X, rare')]
 
 # tex, name, list of nuisances, combine nuisances?
@@ -182,7 +186,8 @@ for b in bins:
     #for proc, tex in [('signal','')]:
         est = sum( [ result["dc_%s_Bin%s"%(year,b)][proc]["yield"] for year in years ])
         ests = { year: result["dc_%s_Bin%s"%(year,b)][proc]["yield"] for year in years }
-        c.specifyExpectation(binname, newproc, est )
+        scale = 1.07 if (newproc.count('TTZ') and options.scaleTTZ) else 1
+        c.specifyExpectation(binname, newproc, est*scale )
         for sys_tex, sys_name, sys_corr, shape, merge in systematics:
             if len(sys_corr) == 1:
                 sigma = sum( [ result["dc_%s_%s"%(year, binname)][proc][sys_corr[0]]*ests[year] for year in years ])

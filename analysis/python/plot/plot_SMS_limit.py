@@ -27,6 +27,7 @@ parser.add_option("--subDir",           dest="subDir",  default='unblindV1',  ac
 parser.add_option("--smoothAlgo",       dest="smoothAlgo",  default='k5a', choices=["k5a", "k3a", "k5b"],  action="store",  help="Which smoothing algo?")
 parser.add_option("--iterations",       dest="iterations", type="int",  default=1,  action="store",  help="How many smoothing iterations?")
 parser.add_option("--combined",         action="store_true",  help="Combine the years?")
+parser.add_option("--expected",         action="store_true",  help="Use expected instead of observed limit for 2D hist?")
 parser.add_option("--unblind",          action="store_true",  help="Use real data?")
 parser.add_option("--smooth",           action="store_true",  help="Use real data?")
 (options, args) = parser.parse_args()
@@ -78,6 +79,8 @@ else:
 plotDir = os.path.join(plot_directory,'limits', signalString, options.version, yearString, options.subDir)
 if options.smooth:
     plotDir += "_smooth_it%s_%s"%(options.iterations, options.smoothAlgo)
+if options.expected:
+    plotDir += '_expected'
 
 import RootTools.plot.helpers as plot_helpers
 plot_helpers.copyIndexPHP( plotDir )
@@ -169,7 +172,7 @@ if options.signal == 'T2tt':
 
 # also fix the diagonal?
 
-for i in ["obs_UL","obs_up","obs_down"]:
+for i in ["obs_UL","obs_up","obs_down", "exp_UL"]:
   hists[i] = hists["obs"].Clone(i)
 
 for i in ["obs_up","obs_down"]:
@@ -234,18 +237,20 @@ for i in ["exp","exp_up","exp_down","obs"]:
 
 from StopsDilepton.tools.xSecSusy import xSecSusy
 xSecSusy_ = xSecSusy()
-xSecKey = "obs" # exp or obs
+xSecKey = "obs"
 for ix in range(hists[xSecKey].GetNbinsX()):
     for iy in range(hists[xSecKey].GetNbinsY()):
         #mStop   = (hists[xSecKey].GetXaxis().GetBinUpEdge(ix)+hists[xSecKey].GetXaxis().GetBinLowEdge(ix)) / 2.
         mStop   = hists[xSecKey].GetXaxis().GetBinUpEdge(ix)
         mNeu    = (hists[xSecKey].GetYaxis().GetBinUpEdge(iy)+hists[xSecKey].GetYaxis().GetBinLowEdge(iy)) / 2.
         v       = hists[xSecKey].GetBinContent(hists[xSecKey].FindBin(mStop, mNeu))
+        v_exp   = hists['exp'].GetBinContent(hists[xSecKey].FindBin(mStop, mNeu)) # get expected limit
         if mStop>99 and v>0 or True:
             scaleup   = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=1) /xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             scaledown = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=-1)/xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             xSec = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             hists["obs_UL"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v * xSec)
+            hists["exp_UL"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v_exp * xSec)
             hists["obs_up"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaleup)
             hists["obs_down"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaledown)
 
@@ -255,6 +260,7 @@ if options.signal == 'T8bbllnunu_XCha0p5_XSlep0p95':
 # set bins for y=0
 for ix in range(hists[xSecKey].GetNbinsX()):
     hists["obs_UL"].SetBinContent(ix, 0, hists["obs_UL"].GetBinContent(ix,1))
+    hists["exp_UL"].SetBinContent(ix, 0, hists["exp_UL"].GetBinContent(ix,1))
     hists["obs_up"].SetBinContent(ix, 0, hists["obs_up"].GetBinContent(ix,1))
     hists["obs_down"].SetBinContent(ix, 0, hists["obs_down"].GetBinContent(ix,1))
 
@@ -296,7 +302,8 @@ modelname = signalString
 temp = ROOT.TFile("tmp.root","recreate")
 
 ## we currently use non-smoothed color maps!
-hists["obs_UL"].Clone("temperature").Write()
+tempHist = "obs_UL" if not options.expected else "exp_UL"
+hists[tempHist].Clone("temperature").Write()
 
 contourPoints = {}
 

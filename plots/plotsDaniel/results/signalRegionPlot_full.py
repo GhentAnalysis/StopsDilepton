@@ -120,7 +120,7 @@ if not options.splitBosons:
                 ('DY', 'Drell-Yan'),
                 ('multiBoson', 'Multiboson'),
                 ('TTZ', 't#bar{t}Z'),
-                ('TTXNoZ', 'Rare')]
+                ('TTXNoZ', 't#bar{t}H/W')]
 else:
     processes = [   ('TTJets', 't#bar{t}/t'),
                 ('DY', 'Drell-Yan'),
@@ -359,6 +359,15 @@ else:
         signal_boxes.append( signal_box )
         signal_ratio_boxes.append( signal_r_box )
 
+def drawCMS( ):
+    tex = ROOT.TLatex()
+    tex.SetNDC()
+    tex.SetTextSize(0.08)
+    tex.SetTextAlign(11) # align right
+    lines = [
+      (0.08, 0.94, 'CMS'),
+    ]
+    return [tex.DrawLatex(*l) for l in lines]
 
 def drawObjects( isData=False, lumi=36. ):
     tex = ROOT.TLatex()
@@ -366,8 +375,8 @@ def drawObjects( isData=False, lumi=36. ):
     tex.SetTextSize(0.05)
     tex.SetTextAlign(11) # align right
     lines = [
-      (0.08, 0.945, 'CMS Simulation') if not isData else ( (0.08, 0.945, 'CMS') if not options.preliminary else (0.08, 0.945, 'CMS #bf{#it{Preliminary}}')),
-      (0.80, 0.945, '#bf{%s fb^{-1} (13 TeV)}'%lumi )
+      (0.16, 0.94, 'Simulation') if not isData else ( (0.16, 0.94, '') if not options.preliminary else (0.16, 0.94, '#bf{#it{Preliminary}}')),
+      (0.80, 0.94, '#bf{%s fb^{-1} (13 TeV)}'%lumi )
     ]
     return [tex.DrawLatex(*l) for l in lines]
 
@@ -410,6 +419,23 @@ def drawDivisions(regions):
     #lines = [ (min+4*i*diff,  0.015, min+4*i*diff, 0.85) if min+4*i*diff<0.74 else (min+4*i*diff,  0.013, min+4*i*diff, 0.54) for i in range(1,len(regions)/4 + 1) ]
     #lines += [ (min+4*3*diff, 0.85, min+4*3*diff, 0.93 ), (min+4*6*diff, 0.85, min+4*6*diff, 0.93 )]
     return [line.DrawLineNDC(*l) for l in lines] + [tex.DrawLatex(*l) for l in []] + [tex2.DrawLatex(*l) for l in lines2]
+
+def drawDivisionsLower(regions):
+    min = 0.08
+    max = 0.95
+    diff = (max-min) / len(regions)
+    lines = []
+    lines2 = []
+    line = ROOT.TLine()
+    line.SetLineWidth(1)
+    line.SetLineStyle(2)
+    lines  = [ (min+2*diff,   0.65, min+2*diff,  1.00) ]
+    lines += [ (min+7*diff,   0.65, min+7*diff,  1.00) ]
+    lines += [ (min+20*diff,  0.65, min+20*diff, 1.00) ]
+    lines += [ (min+32*diff,  0.65, min+32*diff, 1.00) ]
+    lines += [ (min+44*diff,  0.65, min+44*diff, 1.00) ]
+    return [line.DrawLineNDC(*l) for l in lines] + [tex.DrawLatex(*l) for l in []] + [tex2.DrawLatex(*l) for l in lines2]
+
 
 def drawLabels( regions ):
     tex = ROOT.TLatex()
@@ -469,11 +495,14 @@ def getLegendRight():
     histos['signal1'].SetLineColor(1)
     histos['signal1'].SetLineWidth(2)
     histos['signal1'].SetLineStyle(1)
-    leg.AddEntry(histos['signal1'], options.signal+' (%s,%s)'%(tuple(massPoint1)), 'l')
-    histos['signal2'].SetLineColor(1)
-    histos['signal2'].SetLineWidth(2)
-    histos['signal2'].SetLineStyle(2)
-    leg.AddEntry(histos['signal2'], options.signal+' (%s,%s)'%(tuple(massPoint2)), 'l')
+    if not options.signal == 'ttHinv':
+        leg.AddEntry(histos['signal1'], options.signal+' (%s,%s)'%(tuple(massPoint1)), 'l')
+        histos['signal2'].SetLineColor(1)
+        histos['signal2'].SetLineWidth(2)
+        histos['signal2'].SetLineStyle(2)
+        leg.AddEntry(histos['signal2'], options.signal+' (%s,%s)'%(tuple(massPoint2)), 'l')
+    else:
+        leg.AddEntry(histos['signal1'], options.signal, 'l')
     histos['data'].SetLineColor(1)
     histos['data'].SetLineWidth(1)
     histos['data'].SetMarkerStyle(8)
@@ -495,7 +524,7 @@ if options.combined:
         plots = [ bkgHist, [histos['data']], [histos['signal1']], [histos['signal2']]]
     else:
         plots = [ bkgHist, [histos['data']], [histos['signal1']]]
-    print "Total signal yield:", histos['signal1'].Integral(), histos['signal2'].Integral()
+    print "Total signal yield:", histos['signal1'].Integral() #, histos['signal2'].Integral()
         
 else:
     if options.signalOnly:
@@ -555,9 +584,9 @@ plotting.draw(
     widths = {'x_width':1300, 'y_width':600, 'y_ratio_width':250},
     yRange = (0.2,yMax),
     #yRange = (0.03, [0.001,0.5]), ### need to go up to 3.19 if we want to show full excess!! ##
-    ratio = {'yRange': (0.11, 2.19), 'texY':'Data/Pred.', 'histos':[(1,0)], 'drawObjects':ratio_boxes if not options.signalOnly else signal_ratio_boxes, #+ drawLabelsLower( regions ) +drawHeadlineLower( regions ) + drawDivisionsLower(regions),
+    ratio = {'yRange': (0.11, 2.19), 'texY':'Obs./Pred.', 'histos':[(1,0)], 'drawObjects': drawDivisionsLower(regions) + ratio_boxes if not options.signalOnly else signal_ratio_boxes, #+ drawLabelsLower( regions ) +drawHeadlineLower( regions ) + drawDivisionsLower(regions),
             'histModifications': [lambda h: setBinLabels(h), lambda h: h.GetYaxis().SetTitleSize(32), lambda h: h.GetYaxis().SetLabelSize(28), lambda h: h.GetYaxis().SetTitleOffset(1.0), lambda h: h.GetXaxis().SetTitleSize(32), lambda h: h.GetXaxis().SetLabelSize(27), lambda h: h.GetXaxis().SetLabelOffset(0.035), lambda h: h.LabelsOption('v'), lambda h: h.GetYaxis().SetTickLength(0.035), lambda h: h.GetXaxis().SetTickLength(0.02)]} ,
-    drawObjects = drawObjects,
+    drawObjects = drawObjects+drawCMS(),
     histModifications = [lambda h: h.GetYaxis().SetTitleSize(32), lambda h: h.GetYaxis().SetLabelSize(28), lambda h: h.GetYaxis().SetTitleOffset(1.0), lambda h: h.GetYaxis().SetTickLength(0.015)],
     canvasModifications = canvasModifications,
     copyIndexPHP = True,
