@@ -190,7 +190,7 @@ if options.combined:
     signalHist.legendText = options.signal+' (%s,%s)'%(tuple(massPoint1))
     if options.signal == 'ttHinv': signalHist.legendText = "ttH, B(H#rightarrow inv)=100%"
     for year in years:
-        print year, hists[year]['signal1'].Integral()
+        print year, hists[year]['signal1'].Integral(21,46)
     for i in range(signalHist.GetNbinsX()):
         signalHist.SetBinContent(i+1, sum([hists[x]['signal1'].GetBinContent(i+1) for x in years]))
     histos['signal1'] = signalHist
@@ -524,7 +524,7 @@ if options.combined:
         plots = [ bkgHist, [histos['data']], [histos['signal1']], [histos['signal2']]]
     else:
         plots = [ bkgHist, [histos['data']], [histos['signal1']]]
-    print "Total signal yield:", histos['signal1'].Integral() #, histos['signal2'].Integral()
+    print "Total signal yield:", histos['signal1'].Integral(23, 48) #, histos['signal2'].Integral()
         
 else:
     if options.signalOnly:
