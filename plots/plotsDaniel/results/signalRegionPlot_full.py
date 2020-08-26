@@ -23,6 +23,7 @@ parser.add_option('--extractSF',            action = "store_true", help="extract
 parser.add_option('--testGrayscale',        action = "store_true", help="Do the most important test for this collaboration?")
 parser.add_option('--splitBosons',          action = "store_true", help="Split multiboson component?")
 parser.add_option('--signalOnly',           action = "store_true", help="Show only signals?")
+parser.add_option('--latex',           action = "store_true", help="Show a SR table?")
 parser.add_option("--year",                 action='store',      default=0, type="int", help='Which year?')
 parser.add_option("--region",               action='store',      default="controlAll", choices=['fitAll', 'controlAll', 'signalOnly', 'controlDYVV'], help='Which year?')
 parser.add_option("--postFix",              action='store',      default="", help='Add sth?')
@@ -89,6 +90,26 @@ else:
 cardFile = "%s/%s.txt"%(cardDir, cardName)
 if inSignalRegions and len(massPoints)>1:
     cardFile2 = "%s/%s.txt"%(cardDir, cardName2)
+
+binLabels = [
+    'TT CR SF',
+    'TT CR DF',
+    'TTZ 2j2b',
+    'TTZ 3j1b',
+    'TTZ 3j2b',
+    'TTZ 4j1b',
+    'TTZ 4j2b',]
+
+binLabels += [ 'CR%s'%i for i in range(13) ]
+for i in range(13):
+    binLabels.append('SR%s SF'%i)
+    binLabels.append('SR%s DF'%i)
+#binLables += [ 'SR%s SF'%i for i in range(13) ]
+
+def setBinLabels( hist ):
+    for i in range(1, hist.GetNbinsX()+1):
+        hist.GetXaxis().SetBinLabel(i, binLabels[i-1])
+#        hist.GetXaxis().SetBinLabel(i, "   %s"%((i+1)/2 if i%2==1 else ''))
 
 
 logger.info("Plotting from cardfile %s"%cardFile)
@@ -278,6 +299,8 @@ ratio_boxes = []
 signal_boxes = []
 signal_ratio_boxes = []
 
+results_table = {}
+
 if options.combined:
     for ib in range(1, 1 + hists[years[0]]['total_background'].GetNbinsX() ):
         val = sum([hists[x]['total_background'].GetBinContent(ib) for x in years])
@@ -304,7 +327,14 @@ if options.combined:
         boxes.append( box )
         hists[years[0]]['total_background'].SetBinError(ib, 0)
         ratio_boxes.append( r_box )
-        print "Bin %s: %s +/- %s"%(ib, val, sys)
+        #print "Bin %s: %s +/- %s"%(ib, val, sys)
+    for ib in range(1, 1 + hists[years[0]]['total_background'].GetNbinsX() ):
+        results_table[binLabels[ib-1]] = { proc: round(sum([hists[x][proc].GetBinContent(ib) for x in years]),2) for proc, tex in processes }
+        val = sum([hists[x]['total_background'].GetBinContent(ib) for x in years])
+        variance = sum( [ covariance['dc_%s_%s'%(comb[0], ib-1)]['dc_%s_%s'%(comb[1], ib-1)] for comb in itertools.combinations_with_replacement(years,2) ] )
+        sys = math.sqrt(variance)
+        results_table[binLabels[ib-1]]['SM'] = '${:.2f} \pm {:.2f}$'.format(val, sys)
+        results_table[binLabels[ib-1]]['index'] = ib
 else:
 
     for ib in range(1, 1 + hists['total_background'].GetNbinsX() ):
@@ -380,25 +410,6 @@ def drawObjects( isData=False, lumi=36. ):
     ]
     return [tex.DrawLatex(*l) for l in lines]
 
-binLabels = [
-    'TT CR SF',
-    'TT CR DF',
-    'TTZ 2j2b',
-    'TTZ 3j1b',
-    'TTZ 3j2b',
-    'TTZ 4j1b',
-    'TTZ 4j2b',]
-
-binLabels += [ 'CR%s'%i for i in range(13) ]
-for i in range(13):
-    binLabels.append('SR%s SF'%i)
-    binLabels.append('SR%s DF'%i)
-#binLables += [ 'SR%s SF'%i for i in range(13) ]
-
-def setBinLabels( hist ):
-    for i in range(1, hist.GetNbinsX()+1):
-        hist.GetXaxis().SetBinLabel(i, binLabels[i-1])
-#        hist.GetXaxis().SetBinLabel(i, "   %s"%((i+1)/2 if i%2==1 else ''))
 
 def drawDivisions(regions):
     #print len(regions)
@@ -591,4 +602,15 @@ plotting.draw(
     canvasModifications = canvasModifications,
     copyIndexPHP = True,
 )
+
+
+import pandas as pd
+
+df = pd.DataFrame(results_table)
+
+print df.transpose()
+print 
+
+if options.latex:
+    print df.transpose().sort_values('index').to_latex(columns=['TTJets', 'DY', 'multiBoson', 'TTZ', 'TTXNoZ', 'SM'], escape=False)
 

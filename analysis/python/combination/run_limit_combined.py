@@ -81,6 +81,8 @@ if not os.path.isfile(cardFile):
     cmd = "python ../run/run_combination.py --signal %s --only=%s --dryRun --useTxt --version %s --controlRegions fitAll"%(options.signal, options.only, options.version)
     subprocess.call(cmd, shell=True)
 
+ttzname = 'TTZDL' if not options.scaleTTZ else 'TTZ'
+
 preFitHist={}
 postFitHist={}
 bhistos=[]
@@ -90,7 +92,7 @@ bkgHist=[]
 processes = [   ('TTJets',     'TTJets',     't#bar{t}/t'),
                 ('DY',         'DY',         'Drell-Yan'),
                 ('multiBoson', 'multiBoson', 'VV/VVV'),
-                ('TTZ',        'TTZ',        't#bar{t}Z'),
+                ('TTZ',        ttzname,     't#bar{t}Z'),
                 ('TTXNoZ',     'TTXNoZ',     't#bar{t}X, rare')]
 
 # tex, name, list of nuisances, combine nuisances?
@@ -104,8 +106,8 @@ systematics = [
     ("Jet energy resolution",                   "JER",      ["JER_2018", "JER_2017",  "JER_2016"],                   shape,  True),
     ("Modeling of unclust. en.",                "metres",   ["unclEn_2016", "unclEn_2017", "unclEn_2018"],           shape,  True), 
     ("Trigger efficiency",                      "trigger2l",  ["trigger_2018", "trigger_2016", "trigger_2017"],      shape,  True),
-    ("b tagging light flavor",                  "SFl",      ["SFl_2018", "SFl_2017", "SFl_2016"],                    shape,  True),
-    ("b tagging heavy flavor",                  "b",        ["SFb_2017", "SFb_2016", "SFb_2018"],                    shape,  True),
+    ("b tagging light flavor",                  "b_light",  ["SFl_2018", "SFl_2017", "SFl_2016"],                    shape,  True),
+    ("b tagging heavy flavor",                  "b_heavy",  ["SFb_2017", "SFb_2016", "SFb_2018"],                    shape,  True),
     ("Lepton scale factors",                    "leptonSF", ["leptonSF"],                                            shape,  False),
     ("L1 prefire correction",                   "Prefire_weight", ["L1prefire"],                                     shape,  False),
     ("0 missing hit scale factor",              "leptonHit0SF", ["leptonHit0SF"],                                    shape,  False),
@@ -165,8 +167,7 @@ else:
 
 # rate parameters
 c.addRateParameter('DY',            1, '[0,10]')
-#c.addRateParameter('TTZ',         1, '[0,10]')
-c.addRateParameter('TTZDL',         1, '[0,10]')
+c.addRateParameter(ttzname,         1, '[0,10]')
 c.addRateParameter('TTJets',        1, '[0,10]')
 c.addRateParameter('multiBoson',    1, '[0.6,1.4]')
 
