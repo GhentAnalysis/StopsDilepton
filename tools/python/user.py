@@ -32,9 +32,9 @@ if os.environ['USER'] in ['robert.schoefbeck']:
     #data_output_directory      = "/afs/hephy.at/data/rschoefbeck02/cmgTuples/"
     postprocessing_output_directory = "/mnt/hephy/cms/robert.schoefbeck/StopsDileptonLegacy/nanoTuples"
     # Where the plots go
-    plot_directory      = "/mnt/hephy/cms/robert.schoefbeck/StopsDileptonLegacy/plots"
+    plot_directory      = "/mnt/hephy/cms/robert.schoefbeck/www/StopsDileptonLegacy/plots"
     # Analysis result files
-    analysis_results        =  '/mnt/hephy/cms/robert.schoefbeck/StopsDileptonLegacy/results/v8'
+    analysis_results        =  '/mnt/hephy/cms/robert.schoefbeck/StopsDileptonLegacy/results/v9'
     cern_proxy_certificate  = '/users/robert.schoefbeck/.private/.proxy'
     cache_dir               = "/mnt/hephy/cms/robert.schoefbeck/StopsDileptonLegacy/caches"
     # directory with veto lists

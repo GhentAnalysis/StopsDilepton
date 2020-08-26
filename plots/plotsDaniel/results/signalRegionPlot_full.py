@@ -201,7 +201,7 @@ if options.combined:
         dataHist.SetBinContent(i+1, sum([hists[x]['data'].Eval(i+0.5) for x in years]))
 
     histos['data'] = dataHist
-    histos['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1., drawOption='e0' )
+    histos['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1.)#, drawOption='e0' )
     histos['data'].legendOption = 'p'
 
     signalHist = hists[years[0]]['DY'].Clone()
@@ -254,7 +254,7 @@ else:
         dataHist.SetBinError(i+1, math.sqrt(hists['data'].Eval(i+0.5)))
 
     hists['data'] = dataHist
-    hists['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1., drawOption='e0' )
+    hists['data'].style = styles.errorStyle( ROOT.kBlack, markerSize = 1.)#, drawOption='e0' )
     hists['data'].legendOption = 'p'
 
     if options.signalOnly:

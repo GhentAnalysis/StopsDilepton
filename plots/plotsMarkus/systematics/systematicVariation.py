@@ -50,6 +50,7 @@ argParser.add_argument('--small',             action='store_true',     help='Run
 argParser.add_argument('--private',           action='store_true',     help='Produce private plots')
 # loading samples
 argParser.add_argument('--dpm',               action='store_true',     help='Use dpm?', )
+argParser.add_argument('--scratch',           action='store_true',     help='Use scratch?', )
 # write caches
 argParser.add_argument('--overwrite',         action='store_true',     help='Overwrite?')
 # Scalings
@@ -83,6 +84,8 @@ logger.info( "Working in year %i", year )
 # Load from DPM?
 if args.dpm:
     data_directory          = "/dpm/oeaw.ac.at/home/cms/store/user/rschoefbeck/Stops2l-postprocessed/"
+if args.scratch:
+    data_directory          = "/scratch/robert.schoefbeck/nanoTuples/"
     
 if year == 2016:
     from StopsDilepton.samples.nanoTuples_Summer16_postProcessed import *
@@ -120,16 +123,16 @@ position = {s.name:i_s for i_s,s in enumerate(mc)}
 signals = []
 if args.signal == "T2tt":
     if year == 2016:
-        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
-        postProcessing_directory = "stops_2016_nano_v0p23/dilep/"
+        #data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        #postProcessing_directory = "stops_2016_nano_v0p23/dilep/"
         from StopsDilepton.samples.nanoTuples_FastSim_Summer16_postProcessed import signals_T2tt as jobs
     elif year == 2017:
-        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
-        postProcessing_directory = "stops_2017_nano_v0p23/dilep/"
+        #data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        #postProcessing_directory = "stops_2017_nano_v0p23/dilep/"
         from StopsDilepton.samples.nanoTuples_FastSim_Fall17_postProcessed import signals_T2tt as jobs
     elif year == 2018:
-        data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
-        postProcessing_directory = "stops_2018_nano_v0p23/dilep/"   
+        #data_directory           = "/afs/hephy.at/data/cms06/nanoTuples/"
+        #postProcessing_directory = "stops_2018_nano_v0p23/dilep/"   
         from StopsDilepton.samples.nanoTuples_FastSim_Autumn18_postProcessed import signals_T2tt as jobs
 
     jobNames = [ x.name for x in jobs ]
@@ -924,6 +927,7 @@ for mode in modes:
             if args.small: cmd.append('--small')
             if args.newMetSigPlots: cmd.append('--newMetSigPlots')
             if args.dpm: cmd.append('--dpm')
+            if args.scratch: cmd.append('--scratch')
             if args.overwrite: cmd.append('--overwrite')
 
             cmd_string = ' '.join( cmd )
@@ -1224,5 +1228,5 @@ for mode in all_modes:
               scaling = {0:1} if args.normalize else {},
               legend = ( (0.18,0.88-0.03*sum(map(len, plot.histos)),0.9,0.88), 2),
               drawObjects = drawObjects( args.scaling ) + boxes,
-              copyIndexPHP = True, extensions = ["png", "pdf"],
+              copyIndexPHP = True, extensions = ["png", "pdf", "root"],
             )

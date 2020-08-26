@@ -1,21 +1,20 @@
-# Signal region
-
-#python systematicVariation.py --era Run2016 --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt #--dpm #--overwrite
-#python systematicVariation.py --era Run2017 --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt --add #--dpm #--overwrite
-#python systematicVariation.py --era Run2018 --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt --add #--dpm #--overwrite
-
-python systematicVariation.py --era Run2016 --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add  
-#python systematicVariation.py --era Run2017 --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add #--dpm #--overwrite
-#python systematicVariation.py --era Run2018 --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add #--dpm #--overwrite
-
-#python systematicVariation.py --dpm --add --era Run2016 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --newMetSigPlots #--overwrite
-#python systematicVariation.py --dpm --era Run2017 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --add --newMetSigPlots #--overwrite
-#python systematicVariation.py --dpm --era Run2018 --signal T2tt --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --newMetSigPlots --add #--overwrite
+## Signal region
 #
-#python systematicVariation.py --dpm --era Run2016 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --newMetSigPlots --add #--overwrite
-#python systematicVariation.py --dpm --era Run2017 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --add --newMetSigPlots #--overwrite
-#python systematicVariation.py --dpm --era Run2018 --signal T2tt --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --newMetSigPlots --add #--overwrite
+#python systematicVariation.py --scratch --era Run2016 --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt #--dpm #--overwrite
+#python systematicVariation.py --scratch --era Run2017 --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt --add #--dpm #--overwrite
+#python systematicVariation.py --scratch --era Run2018 --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --signal T2tt --add #--dpm #--overwrite
+#
+#python systematicVariation.py --scratch --era Run2016 --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add #--dpm #--overwrite
+#python systematicVariation.py --scratch --era Run2017 --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add #--dpm #--overwrite
+#python systematicVariation.py --scratch --era Run2018 --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag1p-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --signal T2tt --add #--dpm #--overwrite
 
+python systematicVariation.py --scratch --era Run2016 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --newMetSigPlots --add #--overwrite
+python systematicVariation.py --scratch --era Run2017 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --add --newMetSigPlots #--overwrite
+python systematicVariation.py --scratch --era Run2018 --signal T2tt --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --newMetSigPlots --add #--overwrite
+
+python systematicVariation.py --scratch --add --era Run2016 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --newMetSigPlots #--overwrite
+python systematicVariation.py --scratch --era Run2017 --signal T2tt --plot_directory v0p23 --reweightPU Central --selection lepSel-badEEJetVeto-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --add --newMetSigPlots #--overwrite
+python systematicVariation.py --scratch --era Run2018 --signal T2tt --plot_directory v0p23 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --newMetSigPlots --add #--overwrite
 #
 #
 ## CR plots 02.28.2020
