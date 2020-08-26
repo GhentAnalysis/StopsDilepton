@@ -9,10 +9,10 @@ import argparse
 from RootTools.core.Sample import Sample
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',        default='INFO',         nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'],             help="Log level for logging")
-argParser.add_argument("--signal",         action='store',        default='T2tt',         nargs='?', choices=["T2tt","T8bbllnunu_XCha0p5_XSlep0p5","T8bbllnunu_XCha0p5_XSlep0p05","T8bbllnunu_XCha0p5_XSlep0p95","T2bW", "ttHinv"],                                                                         help="which signal scan?")
+argParser.add_argument("--signal",         action='store',        default='T2tt',         nargs='?', choices=["T2tt","T8bbllnunu_XCha0p5_XSlep0p5","T8bbllnunu_XCha0p5_XSlep0p05","T8bbllnunu_XCha0p5_XSlep0p95","T2bW", "ttHinv", "TTbarDM"], help="which signal scan?")
+argParser.add_argument("--version",        action='store',        default='v8',           nargs='?',                                                                          help="which signal scan?")
 argParser.add_argument("--overwrite",      action = "store_true", default = False,                                                                                                             help="Overwrite existing output files")
 argParser.add_argument("--controlRegions", action='store',        default='signalOnly',   nargs='?', choices=["control2016","controlAll","signalOnly","controlDYVV","controlTTZ","controlTT","fitAll"],                help="which signal scan?")
-
 argParser.add_argument("--model",          action='store',        default='dim6top_LO',   nargs='?', choices=["dim6top_LO", "ewkDM"],                                                          help="which signal model?")
 argParser.add_argument("--only",           action='store',        default=None,           nargs='?',                                                                                           help="pick only one signal point?")
 argParser.add_argument("--skipYear",       action='store',        default=None, type=int, nargs='?', choices=[2016,2017,2018],                                                                 help="pick only one signal point?")
@@ -60,6 +60,8 @@ years = [2016,2017,2018]
 if args.skipYear:
     years.remove(args.skipYear)
 #analysis_results = '/afs/hephy.at/work/p/phussain/StopsDileptonLegacy/results/v3/'
+
+analysis_results = analysis_results.replace('v8', args.version)
 
 vetoList = ["T2tt_275_25"]
 
@@ -260,6 +262,11 @@ elif args.signal == "ttHinv":
     postProcessing_directory    = 'stops_2018_nano_v0p22/dilep/'
     ttH_HToInvisible_M125 = Sample.fromDirectory(name="ttH_HToInvisible_M125", treeName="Events", isData=False, color=1, texName="ttH(125)", directory=os.path.join(data_directory,postProcessing_directory,'ttH_HToInvisible'))
     jobs = [ttH_HToInvisible_M125]
+elif args.signal == "TTbarDM":
+    data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+    postProcessing_directory    = 'stops_2016_nano_v0p25/dilep/'
+    from StopsDilepton.samples.nanoTuples_Summer16_TTDM_postProcessed import signals as jobs
+
 
 # FIXME: removing 1052_0 from list
 for i, j in enumerate(jobs):
@@ -300,7 +307,7 @@ results_df = pd.DataFrame(r_list)
 
 #results_df[results_df['0.500']<1.].sort_values('stop')[['stop','lsp']]
 
-if args.signal=='ttHinv': exit()
+if args.signal=='ttHinv' or args.signal == 'TTbarDM': exit()
 
 exculuded_exp_stop = results_df[results_df['0.500']<1.]['stop'].tolist()
 exculuded_exp_lsp  = results_df[results_df['0.500']<1.]['lsp'].tolist()

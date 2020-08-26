@@ -341,7 +341,8 @@ class Setup:
               res['prefixes'].append('lepSel')
               res['cuts'].append("l1_pt>30&&l2_pt>20")
               
-        res['cuts'].append(getFilterCut(isData=(dataMC=='Data'), year=self.year, isFastSim=isFastSim, skipBadPFMuon=False, skipVertexFilter=True))
+        #res['cuts'].append(getFilterCut(isData=(dataMC=='Data'), year=self.year, isFastSim=isFastSim, skipBadPFMuon=False, skipVertexFilter=True))
+        res['cuts'].append(getFilterCut(isData=(dataMC=='Data'), year=self.year, isFastSim=isFastSim, skipBadPFMuon=False))
         if dataMC=='Data' and self.year == 2018:
             res['cuts'].append('reweightHEM>0')
         res['cuts'].extend(self.externalCuts)

@@ -377,12 +377,16 @@ def wrapper(s):
                         nonGaussUncertainty = 1.02
                         normUncertainty     = 1.08
                     elif (setup.regions != noRegions and (r in regionsHiMT2ll)):
-                        fakeUncertainty     = 1.20
-                        nonGaussUncertainty = 1.25
+                        fakeUncertainty     = 1.15 # 1.20, 1.15
+                        nonGaussUncertainty = 1.20 # 1.25, 1.20
+                        normUncertainty     = 1.10
+                    elif (setup.regions != noRegions and (r in regionsLoMT2ll)):
+                        fakeUncertainty     = 1.05 # 1.20, 1.15
+                        nonGaussUncertainty = 1.10 # 1.25, 1.20
                         normUncertainty     = 1.10
                     else:
-                        fakeUncertainty     = 1.05
-                        nonGaussUncertainty = 1.10
+                        fakeUncertainty     = 1.17 # 1.05, 1.17
+                        nonGaussUncertainty = 1.15 # 1.10, 1.15
                         normUncertainty     = 1.10
                     TT_SF = 1
                     if TT_SF != 1: logger.warning("Scaling ttbar background by %s", TT_SF)
@@ -652,8 +656,9 @@ def wrapper(s):
         print "File %s found. Reusing."%cardFileName
     
 
-    print "FastSim lepton uncertainty:", max(fastSim_lep), min(fastSim_lep)
-    print "FastSim b-tag uncertainty:", max(fastSim_b), min(fastSim_b)
+    if fastSim:
+        print "FastSim lepton uncertainty:", max(fastSim_lep), min(fastSim_lep)
+        print "FastSim b-tag uncertainty:", max(fastSim_b), min(fastSim_b)
 
 
     print "Max MC stat uncertainties:"
@@ -904,6 +909,20 @@ def wrapper(s):
 # Load the signals and run the code! #
 ######################################
 
+if args.signal == 'TTbarDM':
+    if year == 2016:
+        data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+        postProcessing_directory    = 'stops_2016_nano_v0p25/dilep/'
+        from StopsDilepton.samples.nanoTuples_Summer16_TTDM_postProcessed import signals as jobs
+    elif year == 2017:
+        data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+        postProcessing_directory    = 'stops_2017_nano_v0p25/dilep/'
+        from StopsDilepton.samples.nanoTuples_Fall17_TTDM_postProcessed import signals as jobs
+    elif year == 2018:
+        data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+        postProcessing_directory    = 'stops_2018_nano_v0p25/dilep/'
+        from StopsDilepton.samples.nanoTuples_Autumn18_TTDM_postProcessed import signals as jobs
+
 if args.signal == "T2tt":
     if year == 2016:
         if args.fullSim:
@@ -989,9 +1008,9 @@ if args.signal == "T8bbllnunu_XCha0p5_XSlep0p95":
 
 if args.signal == "ttHinv":
     if year == 2016:
-        data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
-        postProcessing_directory    = 'stops_2018_nano_v0p22/dilep/'
-        logger.info(" ## NO 2016 ttH, H->invisible sample available. USING 2018 SAMPLE NOW. ## ")
+        data_directory              = '/afs/hephy.at/data/cms03/nanoTuples/'
+        postProcessing_directory    = 'stops_2016_nano_v0p26/dilep/'
+        #logger.info(" ## NO 2016 ttH, H->invisible sample available. USING 2018 SAMPLE NOW. ## ")
     elif year == 2017:
         data_directory              = '/afs/hephy.at/data/cms09/nanoTuples/'
         postProcessing_directory    = 'stops_2017_nano_v0p22/dilep/'

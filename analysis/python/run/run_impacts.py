@@ -34,7 +34,7 @@ year = int(args.year)
 
 def wrapper(s):
     logger.info("Processing mass point %s"%s.name)
-    cardFile = "%s_shapeCard.txt"%s.name if not args.useTxt else "%s.txt"%s.name
+    cardFile = "%s_combination_shapeCard.txt"%s.name if not args.useTxt else "%s.txt"%s.name
     #analysis_results = '/afs/hephy.at/work/p/phussain/StopsDileptonLegacy/results/v2/'
     sSubDir = 'expected' if args.expected else 'observed'
     if args.signalInjection: sSubDir += '_signalInjected'
@@ -66,7 +66,7 @@ def wrapper(s):
     
     os.system(combineCommand)
     
-    plotDir = plot_directory + "/impacts/"
+    plotDir = plot_directory + "/impacts_combination/"
     if args.expected:
         s.name += '_expected'
     if args.bkgOnly:

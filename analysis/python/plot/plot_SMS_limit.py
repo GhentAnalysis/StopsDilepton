@@ -27,6 +27,7 @@ parser.add_option("--subDir",           dest="subDir",  default='unblindV1',  ac
 parser.add_option("--smoothAlgo",       dest="smoothAlgo",  default='k5a', choices=["k5a", "k3a", "k5b"],  action="store",  help="Which smoothing algo?")
 parser.add_option("--iterations",       dest="iterations", type="int",  default=1,  action="store",  help="How many smoothing iterations?")
 parser.add_option("--combined",         action="store_true",  help="Combine the years?")
+parser.add_option("--expected",         action="store_true",  help="Use expected instead of observed limit for 2D hist?")
 parser.add_option("--unblind",          action="store_true",  help="Use real data?")
 parser.add_option("--smooth",           action="store_true",  help="Use real data?")
 (options, args) = parser.parse_args()
@@ -78,6 +79,8 @@ else:
 plotDir = os.path.join(plot_directory,'limits', signalString, options.version, yearString, options.subDir)
 if options.smooth:
     plotDir += "_smooth_it%s_%s"%(options.iterations, options.smoothAlgo)
+if options.expected:
+    plotDir += '_expected'
 
 import RootTools.plot.helpers as plot_helpers
 plot_helpers.copyIndexPHP( plotDir )
@@ -116,6 +119,7 @@ if options.signal == 'T2bW':
     results_df = results_df[results_df['-1.000']<2.5*results_df['0.840']]
     results_df = results_df.drop(index=331)
     results_df = results_df.drop(index=319) #319, 334
+    results_df = results_df.drop(index=335) #this is another fluctuation point
 
 
 #results_df = results_df[(results_df['stop']-results_df['lsp'])>174]
@@ -123,7 +127,15 @@ if options.signal == 'T2bW':
 ## filter out the additional points
 #results_df = results_df[results_df['stop']%5==0][results_df['lsp']%5==0]
 if options.signal == 'T2tt':
+    results_df = results_df.drop(index=439)
     results_df = results_df[results_df['stop']%5==0]
+
+
+if options.signal == 'T8bbllnunu_XCha0p5_XSlep0p5':
+    pass
+    #results_df = results_df.drop(index=439)
+    #results_df = results_df[(results_df['stop']%25==0)]
+    #results_df = results_df[(results_df['lsp']%25==0)]
 
 exp_graph       = toGraph2D('exp',      'exp',      len(results_df['stop'].tolist()),results_df['stop'].tolist(),results_df['lsp'].tolist(),results_df['0.500'].tolist())
 exp_up_graph    = toGraph2D('exp_up',   'exp_up',   len(results_df['stop'].tolist()),results_df['stop'].tolist(),results_df['lsp'].tolist(),results_df['0.840'].tolist())
@@ -148,7 +160,8 @@ for i in ["exp","exp_up","exp_down", "obs"]:
 #  fix the corridor
 if options.signal == 'T2tt':
     limit = limit_top
-    for mStop in range(175,1000,5):
+    #for mStop in range(175,1000,5):
+    for mStop in range(175,650,5):
         if len(results_df[results_df['stop']==mStop][results_df['lsp']==(mStop-175)])>0:
             #print mStop, float(results_df[results_df['stop']==mStop][results_df['lsp']==(mStop-175)]['-1.000'])
             limit = float(results_df[results_df['stop']==mStop][results_df['lsp']==(mStop-175)]['-1.000'])
@@ -159,7 +172,7 @@ if options.signal == 'T2tt':
 
 # also fix the diagonal?
 
-for i in ["obs_UL","obs_up","obs_down"]:
+for i in ["obs_UL","obs_up","obs_down", "exp_UL"]:
   hists[i] = hists["obs"].Clone(i)
 
 for i in ["obs_up","obs_down"]:
@@ -224,24 +237,30 @@ for i in ["exp","exp_up","exp_down","obs"]:
 
 from StopsDilepton.tools.xSecSusy import xSecSusy
 xSecSusy_ = xSecSusy()
-xSecKey = "obs" # exp or obs
+xSecKey = "obs"
 for ix in range(hists[xSecKey].GetNbinsX()):
     for iy in range(hists[xSecKey].GetNbinsY()):
         #mStop   = (hists[xSecKey].GetXaxis().GetBinUpEdge(ix)+hists[xSecKey].GetXaxis().GetBinLowEdge(ix)) / 2.
         mStop   = hists[xSecKey].GetXaxis().GetBinUpEdge(ix)
         mNeu    = (hists[xSecKey].GetYaxis().GetBinUpEdge(iy)+hists[xSecKey].GetYaxis().GetBinLowEdge(iy)) / 2.
         v       = hists[xSecKey].GetBinContent(hists[xSecKey].FindBin(mStop, mNeu))
+        v_exp   = hists['exp'].GetBinContent(hists[xSecKey].FindBin(mStop, mNeu)) # get expected limit
         if mStop>99 and v>0 or True:
             scaleup   = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=1) /xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             scaledown = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=-1)/xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             xSec = xSecSusy_.getXSec(channel='stop13TeV',mass=mStop,sigma=0)
             hists["obs_UL"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v * xSec)
+            hists["exp_UL"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v_exp * xSec)
             hists["obs_up"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaleup)
             hists["obs_down"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaledown)
+
+if options.signal == 'T8bbllnunu_XCha0p5_XSlep0p95':
+    hists["obs_UL"].SetBinContent(hists[xSecKey].FindBin(201, 1), 1)
 
 # set bins for y=0
 for ix in range(hists[xSecKey].GetNbinsX()):
     hists["obs_UL"].SetBinContent(ix, 0, hists["obs_UL"].GetBinContent(ix,1))
+    hists["exp_UL"].SetBinContent(ix, 0, hists["exp_UL"].GetBinContent(ix,1))
     hists["obs_up"].SetBinContent(ix, 0, hists["obs_up"].GetBinContent(ix,1))
     hists["obs_down"].SetBinContent(ix, 0, hists["obs_down"].GetBinContent(ix,1))
 
@@ -253,9 +272,9 @@ for ix in range(hists[xSecKey].GetNbinsX()):
                 if hists[i].GetBinContent(ix,iy) == 0:
                     hists[i].SetBinContent(ix,iy,1e6)
 
-if options.smooth:
-    for i in ["exp", "exp_up", "exp_down", "obs", "obs_up", "obs_down", "obs"]:
-        hists[i + "_smooth"] = hists[i].Clone(i + "_smooth")
+for i in ["exp", "exp_up", "exp_down", "obs", "obs_up", "obs_down", "obs"]:
+    hists[i + "_smooth"] = hists[i].Clone(i + "_smooth")
+    if options.smooth:
         for x in range(int(options.iterations)):
             hists[i + "_smooth"].Smooth(1,options.smoothAlgo)
 
@@ -283,7 +302,8 @@ modelname = signalString
 temp = ROOT.TFile("tmp.root","recreate")
 
 ## we currently use non-smoothed color maps!
-hists["obs_UL"].Clone("temperature").Write()
+tempHist = "obs_UL" if not options.expected else "exp_UL"
+hists[tempHist].Clone("temperature").Write()
 
 contourPoints = {}
 
@@ -315,11 +335,39 @@ def angle_between(v1, v2):
 
 if options.signal == 'T2tt':
     corridor = {}
+    ## this should also be automatized
+    #corridor['obs']        = contourPoints['obs'][1] + contourPoints['obs'][2] + contourPoints['obs'][3] + contourPoints['obs'][4] + contourPoints['obs'][5]
+    #corridor['obs_up']     = contourPoints['obs_up'][1] + contourPoints['obs_up'][2] + contourPoints['obs_up'][3] + contourPoints['obs_up'][4] + contourPoints['obs_up'][5]
+    #corridor['obs_down']   = contourPoints['obs_down'][1] + contourPoints['obs_down'][2] + contourPoints['obs_down'][3]
     # this should also be automatized
-    corridor['obs']        = contourPoints['obs'][1] + contourPoints['obs'][2] + contourPoints['obs'][3] + contourPoints['obs'][4] + contourPoints['obs'][5]
-    corridor['obs_up']     = contourPoints['obs_up'][1] + contourPoints['obs_up'][2] + contourPoints['obs_up'][3] + contourPoints['obs_up'][4] + contourPoints['obs_up'][5]
-    corridor['obs_down']   = contourPoints['obs_down'][1] + contourPoints['obs_down'][2] + contourPoints['obs_down'][3]
+    print len(contourPoints['obs'])
+    print len(contourPoints['obs_up'])
+    print len(contourPoints['obs_down'])
+    #corridor['obs']        = contourPoints['obs'][1] + contourPoints['obs'][2] + contourPoints['obs'][3]
+    #corridor['obs_up']     = contourPoints['obs_up'][1] + contourPoints['obs_up'][2] + contourPoints['obs_up'][3]
+    #corridor['obs_down']   = contourPoints['obs_down'][1] + contourPoints['obs_down'][2]
+    #corridor['obs']        = []
+    #for i in range(0, len(contourPoints['obs'])):
+    #    print contourPoints['obs'][i]
+    #    corridor['obs'] += contourPoints['obs'][i]
+    #corridor['obs_up']     = contourPoints['obs_up'][1] + contourPoints['obs_up'][2] + contourPoints['obs_up'][3]
+    #corridor['obs_down']   = contourPoints['obs_down'][1] + contourPoints['obs_down'][2]
 
+    corridor['obs'] = [\
+        #{'x':175, 'y':25}, {'x':310, 'y':185}, {'x':350, 'y':200}, {'x':425, 'y':250}, {'x':350, 'y':150}, {'x':310, 'y':170}, {'x':190, 'y':0}\
+        {'x':150, 'y':0}, {'x':262.5, 'y':112.5}, {'x':370, 'y':200}, {'x':395, 'y':260}, {'x':405, 'y':260},  {'x':385, 'y':252}, {'x':325, 'y':200}, {'x':150, 'y':37}\
+    ]
+    corridor['obs_up']     = [\
+        {'x':150, 'y':0}, {'x':262.5, 'y':112.5}, {'x':370, 'y':200}, {'x':395, 'y':260}, {'x':405, 'y':260},  {'x':385, 'y':252}, {'x':325, 'y':200}, {'x':150, 'y':37}\
+        #{'x':150, 'y':0}, {'x':262.5, 'y':112.5}, {'x':370, 'y':200}, {'x':425, 'y':270}, {'x':410, 'y':275}, {'x':325, 'y':200}, {'x':150, 'y':37}\
+        #{'x':175, 'y':25}, {'x':310, 'y':185}, {'x':350, 'y':200}, {'x':425, 'y':250}, {'x':350, 'y':150}, {'x':310, 'y':170}, {'x':190, 'y':0}\
+    ]
+    corridor['obs_down']     = [\
+        {'x':150, 'y':0}, {'x':262.5, 'y':112.5}, {'x':370, 'y':200}, {'x':395, 'y':260}, {'x':405, 'y':260},  {'x':385, 'y':252}, {'x':325, 'y':200}, {'x':150, 'y':37}\
+        #{'x':150, 'y':0}, {'x':262.5, 'y':112.5}, {'x':370, 'y':200}, {'x':425, 'y':270}, {'x':410, 'y':275}, {'x':325, 'y':200}, {'x':150, 'y':37}\
+        #{'x':175, 'y':25}, {'x':310, 'y':185}, {'x':350, 'y':200}, {'x':425, 'y':250}, {'x':350, 'y':150}, {'x':310, 'y':170}, {'x':190, 'y':0}\
+    ]
+    
     for o in ['obs', 'obs_up', 'obs_down']:
         for p in corridor[o]:
             p.update(getProjection(p['x'], p['y'], 310, 175))
@@ -329,17 +377,17 @@ if options.signal == 'T2tt':
         corridor[o+'_x_list'] = corridor[o+'_df'][corridor[o+'_df']['x']<600].sort_values('phi')['x'].tolist()
         corridor[o+'_y_list'] = corridor[o+'_df'][corridor[o+'_df']['x']<600].sort_values('phi')['y'].tolist()
         
-        pos = 0
-        for j in range(len(corridor[o+'_x_list'])):
-            if pos+2 >= len(corridor[o+'_x_list']): break
-            i = pos
-            phi = angle_between((corridor[o+'_x_list'][i]-corridor[o+'_x_list'][i+1], corridor[o+'_y_list'][i]-corridor[o+'_y_list'][i+1]), (corridor[o+'_x_list'][i+2]-corridor[o+'_x_list'][i+1], corridor[o+'_y_list'][i+2]-corridor[o+'_y_list'][i+1]) )
-            if phi > 1.5 and phi is not float('nan'):
-                pos += 1
-            else:
-                # remove the outlier from the list
-                corridor[o+'_x_list'].pop(i+2)
-                corridor[o+'_y_list'].pop(i+2)
+        #pos = 0
+        #for j in range(len(corridor[o+'_x_list'])):
+        #    if pos+2 >= len(corridor[o+'_x_list']): break
+        #    i = pos
+        #    phi = angle_between((corridor[o+'_x_list'][i]-corridor[o+'_x_list'][i+1], corridor[o+'_y_list'][i]-corridor[o+'_y_list'][i+1]), (corridor[o+'_x_list'][i+2]-corridor[o+'_x_list'][i+1], corridor[o+'_y_list'][i+2]-corridor[o+'_y_list'][i+1]) )
+        #    if phi > 1.5 and phi is not float('nan'):
+        #        pos += 1
+        #    else:
+        #        # remove the outlier from the list
+        #        corridor[o+'_x_list'].pop(i+2)
+        #        corridor[o+'_y_list'].pop(i+2)
 
         corridor[o+'_x_list'] += corridor[o+'_x_list'][:1]
         corridor[o+'_y_list'] += corridor[o+'_y_list'][:1]
@@ -371,7 +419,7 @@ else:
     fileIN = inputFile('SMS_limit.cfg')
 
 # classic temperature histogra
-xsecPlot = smsPlotXSEC(modelname, fileIN.HISTOGRAM, fileIN.OBSERVED, fileIN.EXPECTED, fileIN.ENERGY, fileIN.LUMI, fileIN.PRELIMINARY, "asdf")
+xsecPlot = smsPlotXSEC(modelname, fileIN.HISTOGRAM, fileIN.OBSERVED, fileIN.EXPECTED, fileIN.ENERGY, fileIN.LUMI, "", "asdf")
 #xsecPlot.Draw( lumi = lumi, zAxis_range = (10**-3,10**2) )
 if options.signal.startswith("T8"):
     xsecPlot.Draw( lumi = lumi, zAxis_range = (10**-4,5*10**2) )

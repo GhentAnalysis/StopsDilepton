@@ -117,13 +117,13 @@ python systematicVariation.py --scratch --era Run2018 --signal T2tt --plot_direc
 #
 #python systematicVariation.py --era Run2018 --plot_directory v0p19 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-onZ-mt2ll100 --add --normalize #--dpm #--overwrite
 #python systematicVariation.py --era Run2018 --plot_directory v0p19 --reweightPU VUp --selection lepSel-POGMetSig12-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1-mt2ll100 --add --normalize #--dpm #--overwrite
-
-
-
-#####################################################################################################################################################################################
-
-# reproduced with signal 02.24.2020
-## fig:metSig-presel-comb (EventSelection.tex)
+#
+#
+#
+######################################################################################################################################################################################
+#
+## reproduced with signal 02.24.2020
+### fig:metSig-presel-comb (EventSelection.tex)
 #python systematicVariation.py --signal T2tt --era Run2016 --plot_directory v0p22 --reweightPU Central --selection lepSel-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --beta noScaling
 #python systematicVariation.py --signal T2tt --era Run2017 --plot_directory v0p22 --reweightPU Central --selection lepSel-badEEJetVeto-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --beta noScaling --add
 #python systematicVariation.py --signal T2tt --era Run2018 --plot_directory v0p22 --reweightPU VUp     --selection lepSel-njet2p-btag0-miniIso0.2-looseLeptonMiniIsoVeto-mll20-dPhiJet0-dPhiJet1 --beta noScaling --add

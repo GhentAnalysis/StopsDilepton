@@ -51,7 +51,7 @@ class cardFileWriter:
     def setPrecision(self, prec):
         self.precision = prec
 
-    def addBin(self, name, processes, niceName=""):
+    def addBin(self, name, processes, niceName="", noSignal=False):
         if len(name)>30:
             logger.info("Name for bin",name,"too long. Max. length is 30.")
             return
@@ -65,7 +65,10 @@ class cardFileWriter:
         self.niceNames[name]=niceName
         self.bins.append(name)
         self.muted[name]=False
-        self.processes[name] = ["signal"]+processes
+        if not noSignal:
+            self.processes[name] = ["signal"]+processes
+        else:
+            self.processes[name] = processes
 
     def addUncertainty(self, name, t, n=0):
         assert len(name)<self.maxUncNameWidth,  "That's too long: %s. Max. length is %i"%(name, self.maxUncNameWidth)
@@ -404,7 +407,7 @@ class cardFileWriter:
             from StopsDilepton.tools.cardFileWriter.getNorms import getNorms
             filename += " > output.txt"
         
-        combineCommand = "cd "+uniqueDirname+";combine --saveWorkspace -M AsymptoticLimits --rMin -100 --rMax 100 %s %s"%(options,filename)
+        combineCommand = "cd "+uniqueDirname+";combine --saveWorkspace -M AsymptoticLimits --rMin -1000 --rMax 100 %s %s"%(options,filename)
         print combineCommand
         os.system(combineCommand)
 

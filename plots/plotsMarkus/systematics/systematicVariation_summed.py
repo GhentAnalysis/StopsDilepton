@@ -407,6 +407,7 @@ for mode in ['mumu', 'ee', 'mue', 'SF', 'all']:
               ratio = {'yRange':(0.1,1.9), 'drawObjects':ratio_boxes},
               logX = False, logY = log, sorting = False,
               yRange = (0.03, "auto") if log else (0.6, "auto") if args.fitChi2 else (0.001, "auto"),
+              #yRange = (0.6, 10**10) if log else (0.6, "auto") if args.fitChi2 else (0.001, "auto"),
               scaling = {0:1} if args.normalize else {},
               legend = ( (0.18,0.88-0.03*sum(map(len, plot.histos)),0.9,0.88), 2),
               drawObjects = drawObjects( args.scaling ) + boxes,

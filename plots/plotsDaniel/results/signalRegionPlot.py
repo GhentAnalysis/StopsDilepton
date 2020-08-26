@@ -8,6 +8,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--signal",               dest='signal',  action='store', default='T2tt',    choices=["T2tt"], help="which signal?")
 parser.add_option("--massPoints",           dest='massPoints',  action='store', default='800_100,350_150', help="which masspoints??")
+parser.add_option("--version",              action='store', default='v8',            nargs='?',      help="Which version of estimates should be used?")
 parser.add_option("--channel",              dest='channel',  action='store', default='all', choices=['all','OF','SF'], help="which channel??")
 parser.add_option("--small",                action='store_true', help="small?")
 parser.add_option('--logLevel',             dest="logLevel",              default='INFO',              action='store',      help="log level?", choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'])
@@ -69,9 +70,9 @@ inSignalRegions = not options.region.count('control')>0
 if inSignalRegions:
     cardName2 = "T2tt_%s_shapeCard"%massPoints[1]
 if options.combined:
-    cardDir = analysis_results+"/COMBINED/%s/cardFiles/%s/%s/"%(controlRegions,options.signal,'expected' if options.expected else 'observed')
+    cardDir = analysis_results.replace('v8','') +'/' + str(options.version)+"/COMBINED/%s/cardFiles/%s/%s/"%(controlRegions,options.signal,'expected' if options.expected else 'observed')
 else:
-    cardDir = analysis_results+"/%s/%s/cardFiles/%s/%s/"%(options.year,controlRegions,options.signal,'expected' if options.expected else 'observed')
+    cardDir = analysis_results.replace('v8','') +'/' + str(options.version)+"/%s/%s/cardFiles/%s/%s/"%(options.year,controlRegions,options.signal,'expected' if options.expected else 'observed')
 
 cardFile = "%s/%s.txt"%(cardDir, cardName)
 if inSignalRegions:
