@@ -5,6 +5,9 @@ __init__.py
 *.png
 *.out
 .*.swp
+*.d
+*.so
+*.pcm
 .#*
 #*#
 *~
