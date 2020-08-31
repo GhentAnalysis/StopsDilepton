@@ -75,7 +75,7 @@ cuts=[
   ("miniIso <=0.2",                         "miniIso <= 0.2",                           "l1_miniRelIso < 0.2 && l2_miniRelIso < 0.2"),
   ("looseLeptonMiniIsoVeto",                "loose lepton veto",               "(Sum$(Electron_pt>15&&abs(Electron_eta)<2.4&&Electron_miniPFRelIso_all<0.4) + Sum$(Muon_pt>15&&abs(Muon_eta)<2.4&&Muon_miniPFRelIso_all<0.4) )==2"),
   ("m(ll)>20",                              "$m(\ell\ell)>20$ GeV",                           "dl_mass>=20"),
-  ("|m(ll) - mZ|>15 for SF",                "$m_{Z}-m(\ell\ell) > 15$ GeV (SF)",            "( (isMuMu==1||isEE==1)&&abs(dl_mass-91.1876)>=15 || isEMu==1 )"),
+  ("|m(ll) - mZ|>15 for SF",                "$|m_{Z}-m(\ell\ell)| > 15$ GeV (SF)",            "( (isMuMu==1||isEE==1)&&abs(dl_mass-91.1876)>=15 || isEMu==1 )"),
   (">=2 jets",                              "$N_{\\textrm{jets}}\geq2$",                             "nJetGood>=2"),
   (">=1 b-tags",                            "$N_{\\textrm{b}}\geq1$",                           "nBTag>=1"),
   ("MET_significance >= 12",                "$\pazocal{S}>12$",              "MET_significance>=12"), 
