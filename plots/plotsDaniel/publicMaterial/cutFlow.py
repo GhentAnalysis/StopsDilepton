@@ -6,7 +6,7 @@ Quick hack from Priya's version - closes with card files up to sub-percent level
 import ROOT
 import os
 import pickle
-from  math import sqrt
+from  math import sqrt, floor, log10
 
 # RootTools
 from RootTools.core.standard import *
@@ -94,8 +94,8 @@ allcuts[2018] = [('filters', 'filters', filters[2018])] + cuts
 import copy
 template = { name:0 for name, texname, sel in allcuts[2016] }
 table_row = { texname:0 for name, texname, sel in allcuts[2016] }
-results = { sample.name:copy.deepcopy(template) for sample in allsamples[2016] }
-table = { sample.name:copy.deepcopy(table_row) for sample in allsamples[2016] }
+results = { sample.name: copy.deepcopy(template) for sample in allsamples[2016] }
+table = { sample.name: copy.deepcopy(table_row) for sample in allsamples[2016] }
 
 for i_cut, cut in enumerate(allcuts[2016]):
     name, texname, sel = cut
@@ -121,9 +121,10 @@ print
 print "### Cut-flow ###"
 print df.sort_values('T2tt_800_100', ascending=False)
 
-
 print
 print "### Latex table ###"
-print tex_table.round(2).sort_values('T2tt_800_100', ascending=False).to_latex(escape=False)
+#print tex_table.round(2).sort_values('T2tt_800_100', ascending=False).to_latex(escape=False)
 
+## only 3 significant figures
+print tex_table.applymap(lambda x: round(x, 3-len(str(int(x)))) ).sort_values('T2tt_800_100', ascending=False).to_latex(escape=False) # this almost does it. for some reason the first line makes problems with individual cell formatting
 
