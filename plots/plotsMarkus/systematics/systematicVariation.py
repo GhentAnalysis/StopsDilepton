@@ -1070,9 +1070,9 @@ for mode in all_modes:
                 variation_data[(mode, 'central')]['histos'][pos_plot][0][0].style = data_sample.style 
                 variation_data[(mode, 'central')]['histos'][pos_plot][0][0].legendText = data_sample.texName
                 # debugging:
-                yield_mc = sum(variation_data[(mode,'central')]['histos'][3*i_plot+2][0][i].Integral() for i, s in enumerate(mc))
-                scale_mc = [dataMC_SF[mode][variation][s.name] for s in mc]
-                if plot.name == "MET_significance_400_mc": print "{}: {} scale: {}".format(plot.name, yield_mc, scale_mc)
+                #yield_mc = sum(variation_data[(mode,'central')]['histos'][3*i_plot+2][0][i].Integral() for i, s in enumerate(mc))
+                #scale_mc = [dataMC_SF[mode][variation][s.name] for s in mc]
+                #if plot.name == "MET_significance_400_mc": print "{}: {} scale: {}".format(plot.name, yield_mc, scale_mc)
 
 # store everything in the dir_db
 dirdb_key =   'variation_data_scaling_%s'%(args.scaling if args.scaling is not None else "None")

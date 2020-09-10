@@ -568,11 +568,11 @@ def getLeptonSelection( mode ):
 # get nvtx reweighting histo
 if args.reweightPU =='nvtx':
     logger.info( "Now obtain nvtx reweighting histo" )
-    data_selectionString = "&&".join([getFilterCut(isData=True, year=year), getLeptonSelection("SF"), cutInterpreter.cutString(args.nvtxReweightSelection)])
+    data_selectionString = "&&".join([getFilterCut(isData=True, year=year,skipVertexFilter=True), getLeptonSelection("SF"), cutInterpreter.cutString(args.nvtxReweightSelection)])
     data_nvtx_histo = data_sample.get1DHistoFromDraw( "PV_npvsGood", [100/5, 0, 100], selectionString=data_selectionString, weightString = "weight" )
     data_nvtx_histo.Scale(1./data_nvtx_histo.Integral())
 
-    mc_selectionString = "&&".join([getFilterCut(isData=False, year=year), getLeptonSelection("SF"), cutInterpreter.cutString(args.nvtxReweightSelection)])
+    mc_selectionString = "&&".join([getFilterCut(isData=False, year=year,skipVertexFilter=True), getLeptonSelection("SF"), cutInterpreter.cutString(args.nvtxReweightSelection)])
     mc_histos  = [ s.get1DHistoFromDraw( "PV_npvsGood", [100/5, 0, 100], selectionString=mc_selectionString, weightString = "weight*reweightHEM*reweightDilepTrigger*reweightLeptonSF*reweightBTag_SF*reweightLeptonTrackingSF") for s in mc]
     mc_nvtx_histo     = mc_histos[0]
     for h in mc_histos[1:]:
@@ -592,7 +592,7 @@ allModes   = ['mumu','mue','ee']
 for index, mode in enumerate(allModes):
   yields[mode] = {}
 
-  data_sample.setSelectionString([getFilterCut(isData=True, year=year), getLeptonSelection(mode)])
+  data_sample.setSelectionString([getFilterCut(isData=True, year=year,skipVertexFilter=True), getLeptonSelection(mode)])
   data_sample.name           = "data"
   data_sample.read_variables = ["event/I","run/I", "reweightHEM/F"]
   data_sample.style          = styles.errorStyle(ROOT.kBlack)
@@ -630,7 +630,7 @@ for index, mode in enumerate(allModes):
     else: #default
         sample.weight         = lambda event, sample: event.reweightPU*event.reweightDilepTrigger*event.reweightLeptonSF*event.reweightBTag_SF*event.reweightLeptonTrackingSF*event.reweightL1Prefire*weight_sip3d(event)*weight_Hit0(event)
 
-    sample.setSelectionString([getFilterCut(isData=False, year=year), getLeptonSelection(mode)])
+    sample.setSelectionString([getFilterCut(isData=False, year=year,skipVertexFilter=True), getLeptonSelection(mode)])
 
   if args.splitMET:
     mc_ = splitMetMC(mc)
