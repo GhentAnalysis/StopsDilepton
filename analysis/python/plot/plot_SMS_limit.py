@@ -235,6 +235,8 @@ for i in ["exp","exp_up","exp_down","obs"]:
     c1.Print(os.path.join(plotDir, 'scatter_%s.png'%i))
     del c1
 
+xsecLimits_df = [] # this will become a data frame
+
 from StopsDilepton.tools.xSecSusy import xSecSusy
 xSecSusy_ = xSecSusy()
 xSecKey = "obs"
@@ -253,6 +255,10 @@ for ix in range(hists[xSecKey].GetNbinsX()):
             hists["exp_UL"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v_exp * xSec)
             hists["obs_up"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaleup)
             hists["obs_down"].SetBinContent(hists[xSecKey].FindBin(mStop, mNeu), v*scaledown)
+            if v>0 and xSec>0:
+                xsecLimits_df.append({'mStop':mStop, 'mLSP':mNeu, 'exp':v_exp * xSec, 'obs': v * xSec})
+
+xsecLimits_df = pd.DataFrame(xsecLimits_df)
 
 if options.signal == 'T8bbllnunu_XCha0p5_XSlep0p95':
     hists["obs_UL"].SetBinContent(hists[xSecKey].FindBin(201, 1), 1)

@@ -473,7 +473,7 @@ def wrapper(s):
                         c.specifyUncertainty('leptonHit0SF', binname, name, 1 + e.leptonHit0SFSystematic(   r, channel, setup).val * uncScale ) 
                         if year == 2016 or year == 2017:
                             c.specifyUncertainty('L1prefire', binname, name, 1 + e.L1PrefireSystematic(   r, channel, setup).val * uncScale ) 
-                        if not e.name.count("TTJets") and not niceName.count('controlTTBar'):
+                        if not (e.name.count("TTJets") and niceName.count('controlTTBar')):
                             c.specifyUncertainty(trigger,    binname, name, 1 + scaleTriggerUnc*e.triggerSystematic(    r, channel, setup).val * uncScale )
 
                         if e.name.count('TTJets'):
